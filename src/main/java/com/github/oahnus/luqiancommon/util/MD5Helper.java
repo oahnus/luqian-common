@@ -1,9 +1,7 @@
 package com.github.oahnus.luqiancommon.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -14,8 +12,6 @@ import java.util.stream.IntStream;
  * 22:24.
  */
 public class MD5Helper {
-    private static Logger LOGGER = LoggerFactory.getLogger(MD5Helper.class);
-
     private static Random RANDOM = new Random();
     private static final String DEFAULT_SALT = "jSeI32!f;%ir(Ms23";
     private static final String SALT_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
@@ -36,10 +32,9 @@ public class MD5Helper {
             int length = clearText.length();
             String preText = clearText.substring(0, length / 2) + slat + clearText.substring(length / 2);
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            byte[] bytes = messageDigest.digest(preText.getBytes("utf-8"));
+            byte[] bytes = messageDigest.digest(preText.getBytes(StandardCharsets.UTF_8));
             return toCipherText(bytes);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            LOGGER.error("ERROR: {}", e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
             return "";
         }
     }

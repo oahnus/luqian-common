@@ -25,10 +25,25 @@
         <spring-boot.version>2.1.6.RELEASE</spring-boot.version>
         <spring-aspectj.version>5.1.5.RELEASE</spring-aspectj.version>
         <qiniu-sdk.version>7.2.25</qiniu-sdk.version>
+        <redisson.version>3.11.1</redisson.version>
+        <spring-configuration-processor.version>2.1.6.RELEASE</spring-configuration-processor.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <version>${spring-configuration-processor.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+<!--                <scope>provided</scope>-->
+            </dependency>
+
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -74,6 +89,11 @@
         <dependency>
             <groupId>com.qiniu</groupId>
             <artifactId>qiniu-java-sdk</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
         </dependency>
     </dependencies>
 </project>
