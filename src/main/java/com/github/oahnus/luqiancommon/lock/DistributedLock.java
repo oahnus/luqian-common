@@ -1,6 +1,7 @@
 package com.github.oahnus.luqiancommon.lock;
 
 import com.github.oahnus.luqiancommon.enums.LockType;
+import org.springframework.context.ApplicationContext;
 
 import java.util.concurrent.TimeUnit;
 
@@ -16,4 +17,6 @@ public interface DistributedLock {
     boolean unlock(String key);
 
     LockType lockType();
+
+    void setApplicationContext(ApplicationContext context);
 }

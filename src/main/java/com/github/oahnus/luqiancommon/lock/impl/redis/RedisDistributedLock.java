@@ -4,6 +4,9 @@ import com.github.oahnus.luqiancommon.enums.LockType;
 import com.github.oahnus.luqiancommon.lock.DistributedLock;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +16,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class RedisDistributedLock implements DistributedLock {
     private RedissonClient redissonClient;
+
+    public RedisDistributedLock() {
+
+    }
 
     @Override
     public boolean lock(String key) {
@@ -58,5 +65,10 @@ public class RedisDistributedLock implements DistributedLock {
     @Override
     public LockType lockType() {
         return LockType.Redis;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext context) {
+        this.redissonClient = context.getBean(RedissonClient.class);
     }
 }

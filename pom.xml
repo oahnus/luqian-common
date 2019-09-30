@@ -27,6 +27,7 @@
         <qiniu-sdk.version>7.2.25</qiniu-sdk.version>
         <redisson.version>3.11.1</redisson.version>
         <spring-configuration-processor.version>2.1.6.RELEASE</spring-configuration-processor.version>
+        <mockito.version>1.10.19</mockito.version>
     </properties>
 
     <dependencyManagement>
@@ -67,10 +68,32 @@
                 <artifactId>qiniu-java-sdk</artifactId>
                 <version>${qiniu-sdk.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

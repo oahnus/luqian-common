@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,7 +48,15 @@ public class LockAspect {
         if (tryLock) {
             res = lockInstance.tryLock(key, waitTime, timeout, timeUnit);
         } else {
-            res = lockInstance.lock(key, waitTime, timeUnit);
+            if (timeout == 0) {
+                res = lockInstance.lock(key);
+            } else {
+                res = lockInstance.lock(key, timeout, timeUnit);
+            }
+        }
+
+        if (!res) {
+            // TODO 获取锁超时策略, 抛出异常还是重试
         }
 
         Object resultVal = null;

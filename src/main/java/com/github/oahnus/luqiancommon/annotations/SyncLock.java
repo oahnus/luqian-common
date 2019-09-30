@@ -23,7 +23,7 @@ public @interface SyncLock {
     // 是否使用 尝试获取锁
     boolean tryLock() default false;
     // 获取锁的最大等待时间 只有tryLock为true时 生效  单位 秒
-    int waitTime() default 0;
+    int waitTime() default 60;
     // 超时时间， 超时后自动释放锁  单位 秒
     int timeout() default 30;
     // 时间单位

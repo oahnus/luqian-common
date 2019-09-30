@@ -4,7 +4,6 @@ import com.github.oahnus.luqiancommon.annotations.Cache;
 import com.github.oahnus.luqiancommon.annotations.CacheClear;
 import com.github.oahnus.luqiancommon.annotations.CachePut;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -20,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by oahnus on 2019/9/21
  * 23:37.
+ * TODO 支持SPEL表达式
  */
 @Component
 @Aspect
@@ -87,7 +87,6 @@ public class CacheAop {
         Method method = methodSignature.getMethod();
 
         Object[] args = pjp.getArgs();
-        // TODO
         try {
             method = pjp.getTarget().getClass().getDeclaredMethod(method.getName(), method.getParameterTypes());
         } catch (NoSuchMethodException e) {
