@@ -2,6 +2,7 @@ package com.github.oahnus.luqiancommon.aspect;
 
 import com.github.oahnus.luqiancommon.annotations.SyncLock;
 import com.github.oahnus.luqiancommon.enums.LockType;
+import com.github.oahnus.luqiancommon.exceptions.SyncLockException;
 import com.github.oahnus.luqiancommon.lock.DistributedLock;
 import com.github.oahnus.luqiancommon.lock.LockSpiLoader;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,7 +33,7 @@ public class LockAspect {
     public void pointCut() {}
 
     @Around("pointCut()")
-    public Object around(ProceedingJoinPoint pjp) {
+    public Object around(ProceedingJoinPoint pjp) throws Throwable {
         Method method = ((MethodSignature) pjp.getSignature()).getMethod();
         SyncLock syncLock = method.getAnnotation(SyncLock.class);
         LockType lockType = syncLock.lockType();
@@ -57,15 +57,16 @@ public class LockAspect {
 
         if (!res) {
             // TODO 获取锁超时策略, 抛出异常还是重试
+            throw new SyncLockException("Fetch Redis Lock Failed");
         }
 
         Object resultVal = null;
         try {
             resultVal = pjp.proceed();
-            res = lockInstance.unlock(key);
+            lockInstance.unlock(key);
         } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            res = lockInstance.unlock(key);
+            lockInstance.unlock(key);
+            throw throwable;
         }
         return resultVal;
     }
