@@ -121,7 +121,15 @@ public class CacheAop {
         TimeUnit unit = cache.unit();
 
         Object[] args = pjp.getArgs();
-        String key = getSpelVal(keyOrSPEL, method, pjp.getTarget(), args);
+        String key;
+        // 如果包含# 作为SPEL表达式处理
+        if (keyOrSPEL.contains("#")) {
+            key = getSpelVal(keyOrSPEL, method, pjp.getTarget(), args);
+        }
+        // 普通字符串常量做key
+        else {
+            key = keyOrSPEL;
+        }
 
         if (StringUtils.isEmpty(key)) {
             key = defaultKey(method, args);
