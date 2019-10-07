@@ -8,8 +8,8 @@ luqian:
   enable: true # true or false required true时, 会加载Config下相关配置类
   # redisson config
   redisson:
-    address: 39.98.237.99:6379
-    password: chuxuan123sh
+    address: 127.0.0.1:6379
+    password: root
     timeout: 3000
     database: 0
     pool:
