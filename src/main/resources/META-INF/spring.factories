@@ -1,4 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration= \
-  com.github.oahnus.luqiancommon.config.cdn.QiNiuAutoConfiguration,\
-  com.github.oahnus.luqiancommon.config.redis.RedissonAutoConfig, \
   com.github.oahnus.luqiancommon.config.LuqianAutoConfiguration

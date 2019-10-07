@@ -10,4 +10,5 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("com.github.oahnus.luqiancommon")
 @Configuration
 public class LuqianAutoConfiguration {
+
 }

@@ -3,6 +3,7 @@ package com.github.oahnus.luqiancommon.aspect;
 import com.github.oahnus.luqiancommon.annotations.Cache;
 import com.github.oahnus.luqiancommon.annotations.CacheClear;
 import com.github.oahnus.luqiancommon.annotations.CachePut;
+import com.github.oahnus.luqiancommon.config.condition.RedissonCondition;
 import com.github.oahnus.luqiancommon.exceptions.CacheException;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,7 +14,9 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -28,11 +31,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by oahnus on 2019/9/21
  * 23:37.
- * TODO 支持SPEL表达式
  */
 @Slf4j
 @Component
 @Aspect
+@Conditional(RedissonCondition.class)
+@Order(2)
 public class CacheAop {
     private LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
     private ExpressionParser parser = new SpelExpressionParser();

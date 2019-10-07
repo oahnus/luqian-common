@@ -19,9 +19,9 @@ public class QiNiuClient {
     private String accessKey;
     private String secretKey;
 
-    public void setProperties(CDNProperties cdnProperties) {
-        this.accessKey = cdnProperties.getAccessKey();
-        this.secretKey = cdnProperties.getSecretKey();
+    public void setProperties(QiniuProperties qiniuProperties) {
+        this.accessKey = qiniuProperties.getAccessKey();
+        this.secretKey = qiniuProperties.getSecretKey();
     }
 
     public String fetchUploadToken(String bucket) {
