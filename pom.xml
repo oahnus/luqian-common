@@ -28,6 +28,7 @@
         <redisson.version>3.11.1</redisson.version>
         <spring-configuration-processor.version>2.1.6.RELEASE</spring-configuration-processor.version>
         <mockito.version>1.10.19</mockito.version>
+        <tkmapper.version>4.1.5</tkmapper.version>
     </properties>
 
     <dependencyManagement>
@@ -36,6 +37,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-configuration-processor</artifactId>
                 <version>${spring-configuration-processor.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>tk.mybatis</groupId>
+                <artifactId>mapper</artifactId>
+                <version>${tkmapper.version}</version>
             </dependency>
 
             <dependency>
@@ -84,6 +91,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>tk.mybatis</groupId>
+            <artifactId>mapper</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
