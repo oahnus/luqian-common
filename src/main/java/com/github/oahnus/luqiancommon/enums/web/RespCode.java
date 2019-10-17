@@ -1,8 +1,6 @@
 package com.github.oahnus.luqiancommon.enums.web;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import lombok.Data;
 
 /**
  * Created by oahnus on 2019/9/20
