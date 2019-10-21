@@ -15,6 +15,11 @@ import org.springframework.stereotype.Component;
 public class SpringAppContextUtils implements ApplicationContextAware {
     private static ApplicationContext context;
 
+    public static String getBeanName(Class clazz) {
+        String clazzName = clazz.getSimpleName();
+        return Character.toLowerCase(clazzName.charAt(0)) + clazzName.substring(1);
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         context = applicationContext;

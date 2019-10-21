@@ -122,7 +122,6 @@ public class QiNiuClient {
 
 
     private static void cleanCacheMap() {
-        log.info("Run Clean Cache Map Task");
         if (TOKEN_CACHE.isEmpty()) {
             return;
         }

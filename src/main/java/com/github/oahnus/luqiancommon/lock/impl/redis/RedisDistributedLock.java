@@ -2,6 +2,7 @@ package com.github.oahnus.luqiancommon.lock.impl.redis;
 
 import com.github.oahnus.luqiancommon.enums.LockType;
 import com.github.oahnus.luqiancommon.lock.DistributedLock;
+import com.github.oahnus.luqiancommon.util.SpringAppContextUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.ApplicationContext;
@@ -67,7 +68,7 @@ public class RedisDistributedLock implements DistributedLock {
 
     @Override
     public void setApplicationContext(ApplicationContext context) {
-        if(context.containsBean(RedissonClient.class.getName())) {
+        if(context.containsBean(SpringAppContextUtils.getBeanName(RedissonClient.class))) {
             this.redissonClient = context.getBean(RedissonClient.class);
         }
     }
