@@ -22,8 +22,9 @@ import java.util.concurrent.TimeUnit;
 public class ZkDistributedLock implements DistributedLock {
     private String applicationName;
     private CuratorFramework client;
-    private static final String LOCK_PATH = "/lock";
     private Map<String, InterProcessLock> lockInstanceMap = new ConcurrentHashMap<>();
+    private String lockBasePath = "";
+    private static final long DEFAULT_WAIT_TIME = 5000; // 5000 ms
 
     @Override
     public boolean lock(String key) {
@@ -44,13 +45,18 @@ public class ZkDistributedLock implements DistributedLock {
 
     @Override
     public boolean lock(String key, int timeout, TimeUnit unit) {
+        return lock(key);
+    }
+
+    @Override
+    public boolean tryLock(String key) {
         if (client == null) {
             return false;
         }
         String wrapKey = wrapKey(key);
         InterProcessLock lock = new InterProcessSemaphoreMutex(client, wrapKey);
         try {
-            lock.acquire(timeout, unit);
+            lock.acquire(DEFAULT_WAIT_TIME, TimeUnit.MICROSECONDS);
             lockInstanceMap.put(wrapKey, lock);
             return true;
         } catch (Exception e) {
@@ -60,12 +66,20 @@ public class ZkDistributedLock implements DistributedLock {
     }
 
     @Override
-    public boolean tryLock(String key) {
-        return false;
-    }
-
-    @Override
     public boolean tryLock(String key, int waittime, int timeout, TimeUnit unit) {
+        if (client == null) {
+            return false;
+        }
+        String wrapKey = wrapKey(key);
+        InterProcessLock lock = new InterProcessSemaphoreMutex(client, wrapKey);
+        try {
+            // acquire(time, unit)  time是等待时间
+            lock.acquire(waittime, unit);
+            lockInstanceMap.put(wrapKey, lock);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -99,8 +113,7 @@ public class ZkDistributedLock implements DistributedLock {
         String applicationName = context.getEnvironment()
                 .getProperty("spring.application.name");
         if (StringUtils.isEmpty(applicationName)) {
-            String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-            applicationName = "SpringBootApplication-" + uuid;
+            applicationName = "SpringBootApplication";
         }
         this.applicationName = applicationName;
 
@@ -116,9 +129,10 @@ public class ZkDistributedLock implements DistributedLock {
 
         ZkDistributedLockFactory.init(zkProperties);
         this.client = ZkDistributedLockFactory.getClient();
+        this.lockBasePath = ZkDistributedLockFactory.getLockBasePath();
     }
 
     private String wrapKey(String key) {
-        return LOCK_PATH + "/" + applicationName + "/" + key;
+        return lockBasePath + "/" + key;
     }
 }
