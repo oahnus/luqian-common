@@ -18,12 +18,14 @@ public class RespData<T> {
         this.msg = "success";
     }
 
-    public void data(T data) {
+    public RespData<T> data(T data) {
         this.data = data;
+        return this;
     }
 
-    public void error(RespCode code, String msg) {
+    public RespData error(RespCode code, String msg) {
         this.code = code;
         this.msg = msg;
+        return this;
     }
 }

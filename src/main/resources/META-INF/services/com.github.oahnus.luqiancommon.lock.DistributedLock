@@ -1,1 +1,2 @@
 com.github.oahnus.luqiancommon.lock.impl.redis.RedisDistributedLock
+com.github.oahnus.luqiancommon.lock.impl.zk.ZkDistributedLock

@@ -6,12 +6,12 @@ import com.github.oahnus.luqiancommon.enums.LockType;
 import com.github.oahnus.luqiancommon.exceptions.SyncLockException;
 import com.github.oahnus.luqiancommon.lock.DistributedLock;
 import com.github.oahnus.luqiancommon.lock.LockSpiLoader;
+import com.github.oahnus.luqiancommon.util.ReflectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
@@ -39,7 +39,7 @@ public class LockAspect {
 
     @Around("pointCut()")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
-        Method method = ((MethodSignature) pjp.getSignature()).getMethod();
+        Method method = ReflectUtils.getMethod(pjp);
         SyncLock syncLock = method.getAnnotation(SyncLock.class);
         LockType lockType = syncLock.lockType();
         boolean tryLock = syncLock.tryLock();

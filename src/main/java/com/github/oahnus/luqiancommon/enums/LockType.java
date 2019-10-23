@@ -5,5 +5,7 @@ package com.github.oahnus.luqiancommon.enums;
  * 22:49.
  */
 public enum LockType {
-    Redis;
+    Redis,
+    ZooKeeper,
+    ;
 }

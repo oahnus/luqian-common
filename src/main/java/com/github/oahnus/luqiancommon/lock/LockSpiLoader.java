@@ -1,14 +1,11 @@
 package com.github.oahnus.luqiancommon.lock;
 
 import com.github.oahnus.luqiancommon.enums.LockType;
-import com.github.oahnus.luqiancommon.util.SpringAppContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

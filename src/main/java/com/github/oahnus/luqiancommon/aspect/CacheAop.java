@@ -4,13 +4,12 @@ import com.github.oahnus.luqiancommon.annotations.Cache;
 import com.github.oahnus.luqiancommon.annotations.CacheClear;
 import com.github.oahnus.luqiancommon.annotations.CachePut;
 import com.github.oahnus.luqiancommon.config.condition.RedissonCondition;
-import com.github.oahnus.luqiancommon.exceptions.CacheException;
+import com.github.oahnus.luqiancommon.util.ReflectUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +62,7 @@ public class CacheAop {
     public Object putCacheAround(final ProceedingJoinPoint pjp) throws Throwable {
         Object resultVal = pjp.proceed();
 
-        Method method = getMethod(pjp);
+        Method method = ReflectUtils.getMethod(pjp);
 
         CachePut cachePut = method.getAnnotation(CachePut.class);
 
@@ -91,7 +90,7 @@ public class CacheAop {
     @Around("clearCache()")
     public Object clearCacheAround(ProceedingJoinPoint pjp) throws Throwable {
         Object resultVal = pjp.proceed();
-        Method method = getMethod(pjp);
+        Method method = ReflectUtils.getMethod(pjp);
 
         CacheClear cache = method.getAnnotation(CacheClear.class);
 
@@ -116,7 +115,7 @@ public class CacheAop {
      */
     @Around("cache()")
     public Object around(final ProceedingJoinPoint pjp) throws Throwable {
-        Method method = getMethod(pjp);
+        Method method = ReflectUtils.getMethod(pjp);
 
         Cache cache = method.getAnnotation(Cache.class);
 
@@ -149,20 +148,6 @@ public class CacheAop {
             bucket.expire(expire, unit);
         }
         return resultVal;
-    }
-
-    private Method getMethod(final ProceedingJoinPoint pjp) {
-        final MethodSignature methodSignature = (MethodSignature) pjp.getSignature();
-        Method method = methodSignature.getMethod();
-
-        if (method.getDeclaringClass().isInterface()) {
-            try {
-                method = pjp.getTarget().getClass().getDeclaredMethod(method.getName(), method.getParameterTypes());
-            } catch (NoSuchMethodException e) {
-                throw new CacheException(e.getMessage());
-            }
-        }
-        return method;
     }
 
     /**
