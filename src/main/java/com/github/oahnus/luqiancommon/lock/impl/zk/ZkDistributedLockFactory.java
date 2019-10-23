@@ -12,10 +12,12 @@ import org.apache.curator.retry.RetryOneTime;
 public class ZkDistributedLockFactory {
 
     private static CuratorFramework client = null;
+    private static final String LOCK_PATH = "/lock";
 
     public static CuratorFramework getClient() {
         return client;
     }
+    public static String getLockBasePath() { return LOCK_PATH; }
 
     public static void init(ZkProperties zkProperties) {
         if (client == null) {
