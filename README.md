@@ -17,6 +17,8 @@ luqian:
       max-idle: 10
       max-wait: 3000
       min-idle: 4
+  zookeeper:
+    connectStr: 127.0.0.1:2181
   qiniu:
     accessKey: 七牛云accesskey
     secretKey: 七牛云secretKey
