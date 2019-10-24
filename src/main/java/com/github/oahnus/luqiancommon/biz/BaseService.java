@@ -64,19 +64,23 @@ public class BaseService<M extends Mapper<T>, T, K> {
         return mapper.selectByExample(ex);
     }
 
-    public void insertSelective(T t) {
-        mapper.insertSelective(t);
+    public int insertSelective(T t) {
+        return mapper.insertSelective(t);
     }
 
-    public void updateSelective(T t) {
-        mapper.updateByPrimaryKeySelective(t);
+    public int updateSelective(T t) {
+        return mapper.updateByPrimaryKeySelective(t);
     }
 
-    public void updateById(T t) {
-        mapper.updateByPrimaryKey(t);
+    public int updateById(T t) {
+        return mapper.updateByPrimaryKey(t);
     }
 
-    public void removeById(Serializable id) {
-        mapper.deleteByPrimaryKey(id);
+    public int insert(T t) {
+        return mapper.insert(t);
+    }
+
+    public int removeById(Serializable id) {
+        return mapper.deleteByPrimaryKey(id);
     }
 }
