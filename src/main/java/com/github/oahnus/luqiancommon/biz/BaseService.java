@@ -1,8 +1,8 @@
 package com.github.oahnus.luqiancommon.biz;
 
+import com.github.oahnus.luqiancommon.mybatis.MyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import tk.mybatis.mapper.common.Mapper;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.Serializable;
@@ -18,7 +18,7 @@ import java.util.List;
  * T Entity
  * K Entity Id Type
  */
-public class BaseService<M extends Mapper<T>, T, K> {
+public class BaseService<M extends MyMapper<T>, T, K> {
     @Autowired
     protected M mapper;
 
@@ -78,6 +78,10 @@ public class BaseService<M extends Mapper<T>, T, K> {
 
     public int insert(T t) {
         return mapper.insert(t);
+    }
+
+    public int insertList(List<T> entityList) {
+        return mapper.insertList(entityList);
     }
 
     public int removeById(Serializable id) {
