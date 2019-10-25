@@ -43,8 +43,6 @@ public class MyEnumTypeHandler<E extends Enum<E> & BaseEnum> extends EnumTypeHan
     }
 
     private E find(int code) {
-        System.out.println("find :" + code);
-
         for (E e : enums) {
             if (e.getCode() == code) {
                 return e;

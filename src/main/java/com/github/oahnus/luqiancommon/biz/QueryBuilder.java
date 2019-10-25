@@ -1,18 +1,28 @@
 package com.github.oahnus.luqiancommon.biz;
 
+import lombok.extern.slf4j.Slf4j;
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by oahnus on 2019/4/19
  * 16:30.
  * tkMapper Example简单包装 默认and连接SQL
  * 复杂查询使用QueryBuilder.or(QueryBuilder.createCriteria) 通过criteria构造符合查询
+ *
+ * TODO order
  */
+@Slf4j
 public class QueryBuilder extends Example {
     private Criteria criteria;
+    private static List<Object> EMPTY = Collections.singletonList(-1);
+    private Class<?> entityClass;
 
     public QueryBuilder(Class<?> entityClass) {
         super(entityClass);
+        this.entityClass = entityClass;
         this.criteria = this.createCriteria();
     }
 
@@ -76,12 +86,27 @@ public class QueryBuilder extends Example {
     }
 
     public QueryBuilder in(String property, Iterable listVal) {
-        criteria.andIn(property, listVal);
+        // 如果listVal 为空, in查询 select * from [TABLE] where [COLUMN] in (-1) 的结果
+        if (!listVal.iterator().hasNext()) {
+            criteria.andIn(property, EMPTY);
+        } else {
+            criteria.andIn(property, listVal);
+        }
         return this;
     }
 
     public QueryBuilder between(String property, Object val1, Object val2) {
         criteria.andBetween(property, val1, val2);
+        return this;
+    }
+
+    public QueryBuilder orderByAsc(String column) {
+        this.setOrderByClause(column.trim() + " ASC");
+        return this;
+    }
+
+    public QueryBuilder orderByDesc(String column) {
+        this.setOrderByClause(column.trim() + " DESC");
         return this;
     }
 }
