@@ -1,7 +1,6 @@
 package com.github.oahnus.luqiancommon.aspect;
 
 import com.github.oahnus.luqiancommon.annotations.SyncLock;
-import com.github.oahnus.luqiancommon.config.condition.RedissonCondition;
 import com.github.oahnus.luqiancommon.enums.LockType;
 import com.github.oahnus.luqiancommon.exceptions.SyncLockException;
 import com.github.oahnus.luqiancommon.lock.DistributedLock;
@@ -12,10 +11,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -28,12 +23,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Aspect
 @Slf4j
-@Order(2)
-@Conditional(RedissonCondition.class)
 public class LockAspect {
-    @Autowired
-    RedissonClient redissonClient;
-
     @Pointcut("@annotation(com.github.oahnus.luqiancommon.annotations.SyncLock)")
     public void pointCut() {}
 

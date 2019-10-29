@@ -24,7 +24,6 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @EnableConfigurationProperties(LuqianProperties.class)
-@Order(1)
 @ConditionalOnProperty(prefix = "luqian", value = "enable", havingValue = "true")
 public class LuqianConfig {
     @Autowired

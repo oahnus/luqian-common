@@ -2,7 +2,6 @@ package com.github.oahnus.luqiancommon.config.props;
 
 import com.github.oahnus.luqiancommon.config.cdn.QiniuProperties;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
