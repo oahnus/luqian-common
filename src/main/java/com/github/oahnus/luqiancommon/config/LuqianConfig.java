@@ -5,7 +5,6 @@ import com.github.oahnus.luqiancommon.config.props.LuqianProperties;
 import com.github.oahnus.luqiancommon.config.props.RedissonProperties;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
-import org.redisson.codec.MsgPackJacksonCodec;
 import org.redisson.config.Config;
 import org.redisson.config.SingleServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,20 +34,26 @@ public class LuqianConfig {
     @Conditional(RedissonCondition.class)
     RedissonClient redissonClient() {
         Config config = new Config();
-        RedissonProperties redissonProperties = properties.getRedisson();
-        String node = redissonProperties.getAddress();
+        RedissonProperties redissonProp = properties.getRedisson();
+
+        String node = redissonProp.getAddress();
         node = node.startsWith("redis://") ? node : "redis://" + node;
+
+        int database = redissonProp.getDatabase();
+
         SingleServerConfig serverConfig = config.useSingleServer()
                 .setAddress(node)
-                .setTimeout(redissonProperties.getTimeout());
-        if (redissonProperties.getPool() != null) {
-            serverConfig.setConnectionMinimumIdleSize(redissonProperties.getPool().getMinIdle());
-        }
+                .setDatabase(database)
+                .setConnectTimeout(redissonProp.getConnectTimeout())
+                .setTimeout(redissonProp.getTimeout());
 
-        if (!StringUtils.isEmpty(redissonProperties.getPassword())) {
-            serverConfig.setPassword(redissonProperties.getPassword());
+        if (redissonProp.getPool() != null) {
+            serverConfig.setConnectionMinimumIdleSize(redissonProp.getPool().getMinIdle());
+            serverConfig.setConnectionPoolSize(redissonProp.getPool().getPoolSize());
         }
-        config.setCodec(MsgPackJacksonCodec.INSTANCE);
+        if (!StringUtils.isEmpty(redissonProp.getPassword())) {
+            serverConfig.setPassword(redissonProp.getPassword());
+        }
         return Redisson.create(config);
     }
 }
