@@ -2,6 +2,8 @@ package com.github.oahnus.luqiancommon.timer;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 /**
  * Created by oahnus on 2020-01-03
  * 16:09.
@@ -19,11 +21,14 @@ public class DelayTask {
     private DelayTask nextTask;
     private DelayTask prevTask;
 
+    private String virtualId;
+
     public DelayTask(Runnable task, long delayMs) {
         this.task = task;
         this.delayMs = delayMs;
 
         this.timeoutTimestamp = System.currentTimeMillis() + delayMs;
+        this.virtualId = UUID.randomUUID().toString();
     }
 
     public DelayTask(Runnable task, long delayMs, String name) {

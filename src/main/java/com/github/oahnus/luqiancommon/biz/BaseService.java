@@ -34,6 +34,14 @@ public class BaseService<M extends MyMapper<T>, T, K> {
         return mapper.selectOneByExample(ex);
     }
 
+    public T selectOne(QueryBuilder qb) {
+        return mapper.selectOneByExample(qb.getExample());
+    }
+
+    public List<T> selectList(QueryBuilder qb) {
+        return mapper.selectByExample(qb.getExample());
+    }
+
     public T selectById(K id) {
         Type idType = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[2];
         Class<K> clazz = (Class<K>) idType;
@@ -76,11 +84,11 @@ public class BaseService<M extends MyMapper<T>, T, K> {
         return mapper.updateByPrimaryKey(t);
     }
 
-    public int insert(T t) {
+    public int save(T t) {
         return mapper.insert(t);
     }
 
-    public int insertList(List<T> entityList) {
+    public int saveBatch(List<T> entityList) {
         return mapper.insertList(entityList);
     }
 

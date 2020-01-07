@@ -53,6 +53,25 @@ public class MineTimer {
         }
     }
 
+    public void remove(String virtualId) {
+        boolean isFind = false;
+        for (TimeSlot timeSlot : slotDelayQueue) {
+            DelayTask rootTask = timeSlot.getRootTask();
+            DelayTask head = rootTask.getNextTask();
+            while (!head.equals(rootTask)) {
+                if (head.getVirtualId().equals(virtualId)) {
+                    head.cancel();
+                    isFind = true;
+                    break;
+                }
+                head = head.getNextTask();
+            }
+            if (isFind) {
+                break;
+            }
+        }
+    }
+
     public void advanceTime(long tickMs) {
         try {
             TimeSlot slot = slotDelayQueue.poll(tickMs, TimeUnit.MILLISECONDS);
