@@ -17,6 +17,7 @@ public class RedissonProperties {
      * 等待节点回复命令的时间。该时间从命令发送成功时开始计时
      */
     private int timeout = 3000;
+    private int connectTimeout = 10000;
 
     private String password;
 

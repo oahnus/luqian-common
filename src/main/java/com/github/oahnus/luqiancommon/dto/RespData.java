@@ -18,14 +18,26 @@ public class RespData<T> {
         this.msg = "success";
     }
 
-    public RespData<T> data(T data) {
-        this.data = data;
-        return this;
+    public static <T> RespData<T> success(T data) {
+        RespData<T> respData = new RespData<>();
+        respData.setData(data);
+        return respData;
+    }
+    public static <T> RespData<T> success() {
+        RespData<T> respData = new RespData<>();
+        respData.setData(null);
+        return respData;
     }
 
-    public RespData error(RespCode code, String msg) {
-        this.code = code;
-        this.msg = msg;
+    public static RespData error(RespCode code, String msg) {
+        RespData respData = new RespData();
+        respData.setCode(code);
+        respData.setMsg(msg);
+        return respData;
+    }
+
+    public RespData<T> data(T data) {
+        this.data = data;
         return this;
     }
 }

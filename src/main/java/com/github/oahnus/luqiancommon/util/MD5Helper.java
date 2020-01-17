@@ -1,6 +1,5 @@
 package com.github.oahnus.luqiancommon.util;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -13,9 +12,14 @@ import java.util.stream.IntStream;
  */
 public class MD5Helper {
     private static Random RANDOM = new Random();
-    private static final String DEFAULT_SALT = "jSeI32!f;%ir(Ms23";
+    private static final String DEFAULT_SALT = "";
     private static final String SALT_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
     private static final int SALT_CHARS_LEN = SALT_CHARS.length();
+
+    public enum MD5_BITS {
+        _16BITS,
+        _32BITS
+    }
 
     public static String generateSalt(Integer digit) {
         return  IntStream.range(0, digit)
@@ -25,6 +29,15 @@ public class MD5Helper {
 
     public static String generateMD5(String clearText) {
         return generateMD5(clearText, DEFAULT_SALT);
+    }
+
+    public static String generateMD5(String clearText, MD5_BITS bits) {
+        String md5 = generateMD5(clearText);
+        if (bits.equals(MD5_BITS._32BITS)) {
+            return md5;
+        } else {
+            return md5.substring(8, 24);
+        }
     }
 
     public static String generateMD5(String clearText, String slat) {
@@ -53,7 +66,8 @@ public class MD5Helper {
 
     public static void main(String... args) {
         String cipher = generateMD5("123456");
-        System.out.println("Cipher:" + cipher);
+        System.out.println(cipher);
+        System.out.println(generateMD5("123456", MD5_BITS._16BITS));
 
         String salt = generateSalt(5);
         System.out.println(generateMD5("123456", salt));

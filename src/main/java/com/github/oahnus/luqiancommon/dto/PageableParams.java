@@ -8,7 +8,7 @@ import lombok.Data;
  * 18:10.
  */
 @Data
-public abstract class PageableParams {
+public class PageableParams {
     private Integer pageNum = 1;
     private Integer pageSize = 10;
     @JsonIgnore

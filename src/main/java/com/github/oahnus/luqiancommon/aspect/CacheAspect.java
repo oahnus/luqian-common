@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 @Aspect
 @Conditional(RedissonCondition.class)
 @Order(2)
-public class CacheAop {
+public class CacheAspect {
     private LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
     private ExpressionParser parser = new SpelExpressionParser();
 

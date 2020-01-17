@@ -1,8 +1,8 @@
 package com.github.oahnus.luqiancommon.biz;
 
+import com.github.oahnus.luqiancommon.mybatis.MyMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import tk.mybatis.mapper.common.Mapper;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.Serializable;
@@ -18,7 +18,7 @@ import java.util.List;
  * T Entity
  * K Entity Id Type
  */
-public class BaseService<M extends Mapper<T>, T, K> {
+public class BaseService<M extends MyMapper<T>, T, K> {
     @Autowired
     protected M mapper;
 
@@ -32,6 +32,14 @@ public class BaseService<M extends Mapper<T>, T, K> {
 
     public T selectOneByExample(Example ex) {
         return mapper.selectOneByExample(ex);
+    }
+
+    public T selectOne(QueryBuilder qb) {
+        return mapper.selectOneByExample(qb.getExample());
+    }
+
+    public List<T> selectList(QueryBuilder qb) {
+        return mapper.selectByExample(qb.getExample());
     }
 
     public T selectById(K id) {
@@ -76,8 +84,12 @@ public class BaseService<M extends Mapper<T>, T, K> {
         return mapper.updateByPrimaryKey(t);
     }
 
-    public int insert(T t) {
+    public int save(T t) {
         return mapper.insert(t);
+    }
+
+    public int saveBatch(List<T> entityList) {
+        return mapper.insertList(entityList);
     }
 
     public int removeById(Serializable id) {
