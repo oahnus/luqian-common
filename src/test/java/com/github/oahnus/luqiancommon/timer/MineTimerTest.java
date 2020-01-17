@@ -6,8 +6,6 @@ import org.junit.runners.JUnit4;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by oahnus on 2020-01-07
  * 13:26.
@@ -23,7 +21,7 @@ public class MineTimerTest {
         timer.add(task);
 
         TimeUnit.SECONDS.sleep(5);
-        timer.remove(task.getVirtualId());
+        boolean ret = timer.remove(task.getVirtualId());
         TimeUnit.SECONDS.sleep(15);
     }
 }

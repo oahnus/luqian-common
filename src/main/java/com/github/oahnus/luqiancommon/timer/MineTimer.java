@@ -53,23 +53,19 @@ public class MineTimer {
         }
     }
 
-    public void remove(String virtualId) {
-        boolean isFind = false;
+    public boolean remove(String virtualId) {
         for (TimeSlot timeSlot : slotDelayQueue) {
             DelayTask rootTask = timeSlot.getRootTask();
             DelayTask head = rootTask.getNextTask();
             while (!head.equals(rootTask)) {
                 if (head.getVirtualId().equals(virtualId)) {
                     head.cancel();
-                    isFind = true;
-                    break;
+                    return true;
                 }
                 head = head.getNextTask();
             }
-            if (isFind) {
-                break;
-            }
         }
+        return false;
     }
 
     public void advanceTime(long tickMs) {
