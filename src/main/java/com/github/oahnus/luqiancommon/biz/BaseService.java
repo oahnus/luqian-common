@@ -42,6 +42,10 @@ public class BaseService<M extends MyMapper<T>, T, K> {
         return mapper.selectByExample(qb.getExample());
     }
 
+    public List<T> selectAll() {
+        return mapper.selectAll();
+    }
+
     public T selectById(K id) {
         Type idType = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[2];
         Class<K> clazz = (Class<K>) idType;

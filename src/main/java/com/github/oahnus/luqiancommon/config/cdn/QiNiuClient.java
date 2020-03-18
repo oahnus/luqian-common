@@ -29,8 +29,9 @@ public class QiNiuClient {
 
     private static Map<String, TokenEntity> TOKEN_CACHE = new ConcurrentHashMap<>();
     private static final long TOKEN_EXPIRE = 60 * 60 * 1000;
-
     private static final long CLEAN_INTERVAL = 1; // 1 min
+
+    private static BucketManager bucketManager;
 
     static {
         Thread cleaner = new Thread(() -> {
@@ -49,6 +50,23 @@ public class QiNiuClient {
     public void setProperties(QiniuProperties qiniuProperties) {
         this.accessKey = qiniuProperties.getAccessKey();
         this.secretKey = qiniuProperties.getSecretKey();
+    }
+
+    /**
+     * 获取资源管理器
+     * @return 资源管理器
+     */
+    public BucketManager getBucketManager() {
+        if (bucketManager == null) {
+            synchronized (this) {
+                if (bucketManager == null) {
+                    Auth auth = Auth.create(accessKey, secretKey);
+                    Configuration cfg = new Configuration(Region.region0());
+                    bucketManager = new BucketManager(auth, cfg);
+                }
+            }
+        }
+        return bucketManager;
     }
 
     public String fetchUploadToken(String bucket) {
@@ -84,9 +102,8 @@ public class QiNiuClient {
             return new QiniuBatchResult().error("Qiniu Key List Size Cannot More Than 1000");
         }
 
-        Auth auth = Auth.create(accessKey, secretKey);
-        Configuration cfg = new Configuration(Region.region0());
-        BucketManager bucketManager = new BucketManager(auth, cfg);
+        BucketManager bucketManager = getBucketManager();
+
         QiniuBatchResult result = new QiniuBatchResult();
         try {
             //单次批量请求的文件数量不得超过1000
@@ -118,8 +135,6 @@ public class QiNiuClient {
         }
         return bucket + ":" + key;
     }
-
-
 
     private static void cleanCacheMap() {
         if (TOKEN_CACHE.isEmpty()) {
