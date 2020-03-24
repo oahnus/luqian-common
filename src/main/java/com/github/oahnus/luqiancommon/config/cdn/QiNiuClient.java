@@ -14,13 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Created by oahnus on 2019/9/20
  * 17:39.
- * TODO 超时是在get时做的检查，CACHE_MAP可能会越来越大，需要定时做清理
  */
 @Slf4j
 public class QiNiuClient {
@@ -28,23 +26,18 @@ public class QiNiuClient {
     private String secretKey;
 
     private static Map<String, TokenEntity> TOKEN_CACHE = new ConcurrentHashMap<>();
-    private static final long TOKEN_EXPIRE = 60 * 60 * 1000;
-    private static final long CLEAN_INTERVAL = 1; // 1 min
+    private static final long TOKEN_EXPIRE = 60 * 60 * 1000; // 1h
+    private static final long CLEAN_INTERVAL = 5 * 60; // 5 min
+    private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
     private static BucketManager bucketManager;
 
     static {
-        Thread cleaner = new Thread(() -> {
-            while (true) {
-                try {
-                    TimeUnit.MINUTES.sleep(CLEAN_INTERVAL);
-                    cleanCacheMap();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, "TokenCacheMapCleaner");
-        cleaner.start();
+        log.debug("[QiNiuClient].static initializer - Init Cache Cleaner");
+        executor.scheduleAtFixedRate(() -> {
+            log.debug("[QiNiuClient].Cleaner - Run Cleaner");
+            cleanCacheMap();
+        }, 5, CLEAN_INTERVAL, TimeUnit.SECONDS);
     }
 
     public void setProperties(QiniuProperties qiniuProperties) {
@@ -136,6 +129,9 @@ public class QiNiuClient {
         return bucket + ":" + key;
     }
 
+    /**
+     * 清除过期token
+     */
     private static void cleanCacheMap() {
         if (TOKEN_CACHE.isEmpty()) {
             return;
