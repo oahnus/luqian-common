@@ -1,8 +1,12 @@
 package com.github.oahnus.luqiancommon.config;
 
+import com.github.oahnus.luqiancommon.config.cdn.QiniuClient;
+import com.github.oahnus.luqiancommon.config.cdn.QiniuProperties;
+import com.github.oahnus.luqiancommon.config.condition.QiniuCondition;
 import com.github.oahnus.luqiancommon.config.condition.RedissonCondition;
 import com.github.oahnus.luqiancommon.config.props.LuqianProperties;
 import com.github.oahnus.luqiancommon.config.props.RedissonProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -21,9 +25,10 @@ import org.springframework.util.StringUtils;
  * Created by oahnus on 2019/10/7
  * 17:59.
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(LuqianProperties.class)
-@ConditionalOnProperty(prefix = "luqian", value = "enable", havingValue = "true")
+@ConditionalOnProperty(prefix = "luqian", value = "inject", havingValue = "true")
 public class LuqianConfig {
     @Autowired
     LuqianProperties properties;
@@ -33,6 +38,7 @@ public class LuqianConfig {
     @ConditionalOnClass({Redisson.class})
     @Conditional(RedissonCondition.class)
     RedissonClient redissonClient() {
+        log.debug("LuqainConfig - Init ReidssonClient");
         Config config = new Config();
         RedissonProperties redissonProp = properties.getRedisson();
 
@@ -55,5 +61,16 @@ public class LuqianConfig {
             serverConfig.setPassword(redissonProp.getPassword());
         }
         return Redisson.create(config);
+    }
+
+    @Bean
+    @Conditional(QiniuCondition.class)
+    public QiniuClient qiNiuClient() {
+        log.info("LuqainConfig - InitQiniuClient");
+        QiniuClient qiNiuClient = new QiniuClient();
+        QiniuProperties qiniuProperties = properties.getQiniu();
+        qiNiuClient.setProperties(qiniuProperties);
+        qiNiuClient.startCleaner();
+        return qiNiuClient;
     }
 }

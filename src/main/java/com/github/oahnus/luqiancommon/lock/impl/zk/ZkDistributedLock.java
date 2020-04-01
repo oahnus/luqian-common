@@ -117,7 +117,7 @@ public class ZkDistributedLock implements DistributedLock {
         this.applicationName = applicationName;
 
         LuqianProperties luqianProperties = context.getBean(LuqianProperties.class);
-        Boolean enable = luqianProperties.getEnable();
+        Boolean enable = luqianProperties.getInject();
         if (enable == null || !enable) {
             return;
         }

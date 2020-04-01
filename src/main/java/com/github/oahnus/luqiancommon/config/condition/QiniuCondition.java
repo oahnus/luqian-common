@@ -14,8 +14,9 @@ public class QiniuCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata annotatedTypeMetadata) {
         Environment env = context.getEnvironment();
+        Boolean inject = Boolean.valueOf(env.getProperty("luqian.inject"));
         String accessKey = env.getProperty("luqian.qiniu.accessKey");
         String secretKey = env.getProperty("luqian.qiniu.secretKey");
-        return !StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey);
+        return inject && !StringUtils.isEmpty(accessKey) && !StringUtils.isEmpty(secretKey);
     }
 }

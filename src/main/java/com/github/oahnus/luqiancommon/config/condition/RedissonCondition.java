@@ -15,7 +15,8 @@ public class RedissonCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata annotatedTypeMetadata) {
         Environment env = context.getEnvironment();
+        Boolean inject = Boolean.valueOf(env.getProperty("luqian.inject"));
         String address = env.getProperty("luqian.redisson.address");
-        return address != null && !address.trim().equals("");
+        return inject && address != null && !address.trim().equals("");
     }
 }

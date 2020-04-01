@@ -10,4 +10,5 @@ import lombok.Data;
 public class QiniuProperties {
     private String accessKey;
     private String secretKey;
+    private String urlPrefix;
 }

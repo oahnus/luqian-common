@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "luqian", ignoreUnknownFields = true)
 public class LuqianProperties {
-    private Boolean enable;
+    private Boolean inject;
     private RedissonProperties redisson;
     private QiniuProperties qiniu;
     private ZkProperties zookeeper;

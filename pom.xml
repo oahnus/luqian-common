@@ -6,7 +6,7 @@
 
     <groupId>com.github.oahnus</groupId>
     <artifactId>luqian-common</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
     <build>
         <plugins>
             <plugin>
@@ -31,6 +31,7 @@
         <tkmapper.version>4.1.5</tkmapper.version>
         <pagehelper.version>1.2.12</pagehelper.version>
         <curator.version>4.2.0</curator.version>
+        <fastjson.version>1.2.56</fastjson.version>
     </properties>
 
     <dependencyManagement>
@@ -39,6 +40,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-configuration-processor</artifactId>
                 <version>${spring-configuration-processor.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.56</version>
             </dependency>
 
             <dependency>
@@ -111,6 +118,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
