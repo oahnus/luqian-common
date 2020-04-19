@@ -11,7 +11,7 @@ import java.util.Base64;
  * Created by oahnus on 2017/11/28
  * 14:05.
  */
-public class DESHelper {
+public class DESUtils {
     private static final String KEY = "jxk;3dfefs";
     private static final String CODE_TYPE = "UTF-8";
 

@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  * 11:49.
  * 检验工具
  */
-public class ValidUtil {
+public class ValidUtils {
     private static Pattern ID_CARD_PATTERN = Pattern.compile("^[1-9][0-9]{5}(19[0-9]{2}|200[0-9]|2010)(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[0-9]{3}[0-9xX]$");
     // 身份证号 加权因子
     private static int[] ID_CARD_FACTOR = new int[]{7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};

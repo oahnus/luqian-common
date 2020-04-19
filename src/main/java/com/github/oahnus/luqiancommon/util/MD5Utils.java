@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
  * Created by oahnus on 2017/10/7
  * 22:24.
  */
-public class MD5Helper {
+public class MD5Utils {
     private static Random RANDOM = new Random();
     private static final String DEFAULT_SALT = "";
     private static final String SALT_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
