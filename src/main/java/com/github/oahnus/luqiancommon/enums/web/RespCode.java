@@ -8,11 +8,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum RespCode {
     SUCCESS(0),
-    NO_AUTH(600401),
-    PERMISSION_DENIED(600403),
-    DATA_NOT_FOUND(600404),
-    CLIENT_ERROR(600410),
-    INNER_SERVER_ERROR(600500)
+    NO_AUTH(60401),
+    FORBIDDEN(60403),
+    DATA_NOT_FOUND(60404),
+
+    CLIENT_ERROR(60410),
+    SERVICE_ERROR(60411),
+    INNER_SERVER_ERROR(60500)
     ;
     private int code;
 

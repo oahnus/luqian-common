@@ -9,12 +9,12 @@ import lombok.Data;
  */
 @Data
 public class RespData<T> {
-    private RespCode code;
+    private int code;
     private String msg;
     private T data;
 
     public RespData() {
-        this.code = RespCode.SUCCESS;
+        this.code = RespCode.SUCCESS.getCode();
         this.msg = "success";
     }
 
@@ -30,6 +30,13 @@ public class RespData<T> {
     }
 
     public static RespData error(RespCode code, String msg) {
+        RespData respData = new RespData();
+        respData.setCode(code.getCode());
+        respData.setMsg(msg);
+        return respData;
+    }
+
+    public static RespData error(int code, String msg) {
         RespData respData = new RespData();
         respData.setCode(code);
         respData.setMsg(msg);

@@ -1,6 +1,9 @@
 package com.github.oahnus.luqiancommon.biz;
 
 import com.github.oahnus.luqiancommon.mybatis.MyMapper;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
@@ -21,6 +24,8 @@ import java.util.List;
 public class BaseService<M extends MyMapper<T>, T, K> {
     @Autowired
     protected M mapper;
+    @Autowired
+    protected SqlSessionFactory sqlSessionFactory;
 
     public T selectOne(T ex) {
         return mapper.selectOne(ex);
@@ -94,6 +99,29 @@ public class BaseService<M extends MyMapper<T>, T, K> {
 
     public int saveBatch(List<T> entityList) {
         return mapper.insertList(entityList);
+    }
+
+    public int updateBatchById(List<T> entityList) {
+        SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false);
+        int res = 0;
+        try {
+            Type idType = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+            Class<K> clazz = (Class<K>) idType;
+
+            MyMapper mapper = (MyMapper) sqlSession.getMapper(clazz);
+            // TODO 切片
+            for (T t : entityList) {
+                res += mapper.updateByPrimaryKey(t);
+            }
+            sqlSession.commit();
+            sqlSession.clearCache();
+        }catch (Exception e) {
+            sqlSession.rollback();
+            throw e;
+        } finally {
+            sqlSession.close();
+        }
+        return res;
     }
 
     public int removeById(Serializable id) {

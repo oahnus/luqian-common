@@ -14,6 +14,15 @@ public class AESUtils {
     private static String CODE_TYPE = "UTF-8";
     private static String SECRET = "clojwna)43:f9c23";
 
+    public static void init(String offset, String secret) {
+        if (offset == null || secret == null) {
+            throw new RuntimeException("offset or secret cannot be null");
+        }
+        if (offset.length() != 16 || secret.length() != 16) {
+            throw new RuntimeException("offset or secret length must be 16");
+        }
+    }
+
     public static String encrypt(String clearText) {
         try {
             IvParameterSpec ips = new IvParameterSpec(OFFSET.getBytes());

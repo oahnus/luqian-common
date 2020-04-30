@@ -27,8 +27,8 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(LuqianProperties.class)
 @ConditionalOnProperty(prefix = "luqian", value = "inject", havingValue = "true")
+@EnableConfigurationProperties(LuqianProperties.class)
 public class LuqianConfig {
     @Autowired
     LuqianProperties properties;

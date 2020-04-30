@@ -1,9 +1,8 @@
 package com.github.oahnus.luqiancommon.util;
 
-import lombok.Data;
-
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by oahnus on 2019-11-20
@@ -87,19 +86,27 @@ public class MyCollectionUtils {
         return null;
     }
 
-    public static void main(String[] args) {
-        @Data
-        class A {
-            private String attr1;
-            private Integer attr2;
+    public static class A {
+        private String attr1;
+        private Integer attr2;
 
-            public A() { }
+        public A() { }
 
-            public A(String attr1, Integer attr2) {
-                this.attr1 = attr1;
-                this.attr2 = attr2;
-            }
+        public A(String attr1, Integer attr2) {
+            this.attr1 = attr1;
+            this.attr2 = attr2;
         }
+
+        public String getAttr1() {
+            return attr1;
+        }
+
+        public Integer getAttr2() {
+            return attr2;
+        }
+    }
+
+    public static void main(String[] args) {
         List<A> list = Arrays.asList(
                 new A("a1", 1),
                 new A("a2", 2),
@@ -107,8 +114,19 @@ public class MyCollectionUtils {
                 new A("a3", 4)
         );
 
-        Map<String, A> map = convertList2Map(list, "attr1", String.class);
-        System.out.println(map);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i< 100;i++) {
+            Map<String, A> map = convertList2Map(list, "attr1", String.class);
+//            System.out.println(map);
+        }
+        System.out.println("Run " + (System.currentTimeMillis() - start));
+
+        start = System.currentTimeMillis();
+        for (int i = 0; i< 100;i++) {
+            Map<String, A> map = list.stream().collect(Collectors.toMap(A::getAttr1, item -> {return item;}));
+//            System.out.println(map);
+        }
+        System.out.println("Run " + (System.currentTimeMillis() - start));
 
         Map<String, List<A>> groupMap = groupList2Map(list, "attr1", String.class);
         System.out.println(groupMap);
