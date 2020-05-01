@@ -13,13 +13,14 @@ public class DelayTask {
 
     private String name;
     private Runnable task;
-    private volatile boolean isCancel;
-    private long delayMs;
+    private volatile boolean isCancel; // 是否取消任务
+    private long delayMs; // 延时时间 ms毫秒
     private long timeoutTimestamp;
     private TimeSlot slot;
 
     private DelayTask nextTask;
     private DelayTask prevTask;
+    private Boolean allways = false; // 任务是否常驻， false 只执行一次
 
     private String virtualId;
 
@@ -34,6 +35,10 @@ public class DelayTask {
     public DelayTask(Runnable task, long delayMs, String name) {
         this(task, delayMs);
         this.name = name;
+    }
+
+    public void refresh() {
+        this.timeoutTimestamp = System.currentTimeMillis() + delayMs;
     }
 
     public void cancel() {

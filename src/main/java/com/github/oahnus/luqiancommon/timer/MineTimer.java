@@ -50,6 +50,11 @@ public class MineTimer {
         if (!timeWheel.addTask(delayTask)) {
             log.debug("RUN TASK {}", delayTask);
             workerThreadPool.submit(delayTask.getTask());
+            // 如果延时任务需要常驻, 在提交执行时，将自身再次加入槽中
+            if (delayTask.getAllways()) {
+                delayTask.refresh();
+                timeWheel.addTask(delayTask);
+            }
         }
     }
 
