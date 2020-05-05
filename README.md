@@ -1,6 +1,6 @@
-# 个人工具包
+# Common
 
-## config
+## 配置
 
 ```yaml
 # application.yml
@@ -24,7 +24,7 @@ luqian:
     secretKey: 七牛云secretKey
 ```
 
-mybatis 枚举转换 
+## 配置mybatis 枚举转换 
 1. 枚举类型 implements BaseEnum类
 2. 创建TypeHandler
     ```java

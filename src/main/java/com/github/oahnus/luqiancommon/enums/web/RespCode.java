@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum RespCode {
     SUCCESS(0),
     NO_AUTH(60401),
+    PARAM_ERROR(60402),
     FORBIDDEN(60403),
     DATA_NOT_FOUND(60404),
 
