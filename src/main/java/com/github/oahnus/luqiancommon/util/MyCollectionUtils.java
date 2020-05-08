@@ -11,20 +11,20 @@ import java.util.stream.Collectors;
 public class MyCollectionUtils {
     /**
      * 将list groupBy 为map
-     * @param entityList list
+     * @param entities entity collection
      * @param keyPropName groupBy 依据的属性 名称
      * @param keyPropClass groupBy 依赖的属性 类
-     * @param <K>
-     * @param <E>
-     * @return
+     * @param <K> Key Class
+     * @param <E> Entity Class
+     * @return Map
      */
-    public static <K, E> Map<K, List<E>> groupList2Map(List<E> entityList, String keyPropName, Class<K> keyPropClass) {
+    public static <K, E> Map<K, List<E>> groupList2Map(Collection<E> entities, String keyPropName, Class<K> keyPropClass) {
         Map<K, List<E>> map = new HashMap<>();
-        if (entityList == null || entityList.isEmpty()) {
+        if (entities == null || entities.isEmpty()) {
             return map;
         }
 
-        for (E entity : entityList) {
+        for (E entity : entities) {
             Field field = getField(entity, keyPropName, keyPropClass);
             if (field == null) {
                 throw new RuntimeException(String.format("Class %s Not Contains Prop %s", keyPropClass, keyPropName));
@@ -47,20 +47,20 @@ public class MyCollectionUtils {
 
     /**
      * 将 list 转换为 指定key 对应的map
-     * @param entityList list
+     * @param entities list
      * @param keyPropName entity中作为key的属性名
      * @param keyPropClass key 属性的class
-     * @param <K>
-     * @param <E>
-     * @return
+     * @param <K> Key Class
+     * @param <E> Entity Class
+     * @return Map
      */
-    public static <K, E> Map<K, E> convertList2Map(List<E> entityList, String keyPropName, Class<K> keyPropClass) {
+    public static <K, E> Map<K, E> convertList2Map(Collection<E> entities, String keyPropName, Class<K> keyPropClass) {
         Map<K, E> map = new HashMap<>();
-        if (entityList == null || entityList.isEmpty()) {
+        if (entities == null || entities.isEmpty()) {
             return map;
         }
 
-        for (E entity : entityList) {
+        for (E entity : entities) {
             Field field = getField(entity, keyPropName, keyPropClass);
             if (field == null) {
                 throw new RuntimeException(String.format("Class %s Not Contains Prop %s", keyPropClass, keyPropName));
@@ -107,12 +107,11 @@ public class MyCollectionUtils {
     }
 
     public static void main(String[] args) {
-        List<A> list = Arrays.asList(
-                new A("a1", 1),
-                new A("a2", 2),
-                new A("a3", 3),
-                new A("a3", 4)
-        );
+        Random random = new Random();
+        List<A> list = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            list.add(new A(i + "", random.nextInt(1000)));
+        }
 
         long start = System.currentTimeMillis();
         for (int i = 0; i< 100;i++) {
@@ -128,7 +127,7 @@ public class MyCollectionUtils {
         }
         System.out.println("Run " + (System.currentTimeMillis() - start));
 
-        Map<String, List<A>> groupMap = groupList2Map(list, "attr1", String.class);
-        System.out.println(groupMap);
+//        Map<String, List<A>> groupMap = groupList2Map(list, "attr1", String.class);
+//        System.out.println(groupMap);
     }
 }
