@@ -1,21 +1,27 @@
-package com.github.oahnus.luqiancommon.util;
+package com.github.oahnus.luqiancommon.util.encrypt;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 
 /**
  * Created by oahnus on 2017/11/28
  * 14:05.
  */
 public class DESUtils {
-    private static final String KEY = "jxk;3dfefs";
+    private static String KEY = "jxk;3dfefs";
     private static final String CODE_TYPE = "UTF-8";
 
-    public static String encodeDES(String clearText) throws InvalidKeyException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, InvalidKeySpecException, NoSuchPaddingException, UnsupportedEncodingException {
+    public static void init(String key) {
+        if (key == null || key.length() < 8) {
+            throw new RuntimeException("key secret length must greater than 8");
+        }
+        KEY = key;
+    }
+
+    public static String encrypt(String clearText) throws InvalidKeyException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidAlgorithmParameterException, InvalidKeySpecException, NoSuchPaddingException, UnsupportedEncodingException {
         // 可信任随机数源
         SecureRandom random = new SecureRandom();
         DESKeySpec dks = new DESKeySpec(KEY.getBytes(CODE_TYPE));
@@ -31,10 +37,10 @@ public class DESUtils {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, random);
         byte[] bytes = cipher.doFinal(clearText.getBytes());
         // 输出方式 BASE64
-        return new String(Base64.getEncoder().encode(bytes));
+        return Encrypt.encode(bytes);
     }
 
-    public static String decodeDES(String cipherText) throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
+    public static String decrypt(String secretText) throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
         // DES算法要求有一个可信任的随机数源
         SecureRandom random = new SecureRandom();
         // 创建一个DESKeySpec对象
@@ -48,6 +54,12 @@ public class DESUtils {
         // 用密匙初始化Cipher对象
         cipher.init(Cipher.DECRYPT_MODE, securekey, random);
 
-        return new String(cipher.doFinal(Base64.getDecoder().decode(cipherText)), CODE_TYPE);
+        return new String(cipher.doFinal(Encrypt.decode(secretText)), CODE_TYPE);
+    }
+
+    public static void main(String[] args) throws BadPaddingException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, IllegalBlockSizeException, UnsupportedEncodingException, NoSuchPaddingException, InvalidKeyException, InvalidKeySpecException {
+        String en = encrypt("111111");
+        System.out.println(en);
+        System.out.println(decrypt(en));
     }
 }

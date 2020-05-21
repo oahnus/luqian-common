@@ -1,4 +1,4 @@
-package com.github.oahnus.luqiancommon.util;
+package com.github.oahnus.luqiancommon.util.encrypt;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -46,22 +46,10 @@ public class MD5Utils {
             String preText = clearText.substring(0, length / 2) + slat + clearText.substring(length / 2);
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             byte[] bytes = messageDigest.digest(preText.getBytes(StandardCharsets.UTF_8));
-            return toCipherText(bytes);
+            return Encrypt.encode(bytes);
         } catch (NoSuchAlgorithmException e) {
             return "";
         }
-    }
-
-    private static String toCipherText(byte[] bytes) {
-        StringBuilder cipherText = new StringBuilder();
-        for (byte aByte : bytes) {
-            int val = aByte & 0xff;
-            if (val < 16) {
-                cipherText.append("0");
-            }
-            cipherText.append(Integer.toHexString(val));
-        }
-        return cipherText.toString();
     }
 
     public static void main(String... args) {
@@ -70,6 +58,7 @@ public class MD5Utils {
         System.out.println(generateMD5("123456", MD5_BITS._16BITS));
 
         String salt = generateSalt(5);
+        System.out.println(salt);
         System.out.println(generateMD5("123456", salt));
     }
 }
