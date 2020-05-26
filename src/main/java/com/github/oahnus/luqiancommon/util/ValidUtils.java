@@ -43,4 +43,40 @@ public class ValidUtils {
             return String.valueOf(result).equals(chars[17]);
         }
     }
+
+    /**
+     * 中国 银行卡号 luhn校验算法
+     * @param bankNum 卡号
+     * @return
+     */
+    public static boolean bankNumLuhn(String bankNum) {
+        int sum = 0;
+        int length = bankNum.length();
+        for (int i = 0; i < length; i++) {
+            char ch = bankNum.charAt(length - i - 1);
+            if ((ch >= 'a' && ch<='z') || (ch >= 'A' && ch<='Z')) {
+                return false;
+            }
+            int num = Character.digit(ch, 10);
+
+            if (((i + 1) & 1) == 0) {
+                int val = num << 1;
+                sum += (val > 9 ? val - 9 : val);
+            } else {
+                sum += num;
+            }
+        }
+
+        if (sum == 0) return false;
+
+        return (sum & 9) == 0;
+    }
+
+    public static void main(String... args) {
+        System.out.println(bankNumLuhn("6225880184694629"));
+        System.out.println(bankNumLuhn("4026587647818317"));
+        System.out.println(bankNumLuhn("6222619185844168449"));
+        System.out.println(bankNumLuhn("8701001752636178"));
+        System.out.println(bankNumLuhn("622292065907906433"));
+    }
 }
