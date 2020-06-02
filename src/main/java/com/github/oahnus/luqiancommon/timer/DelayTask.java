@@ -27,6 +27,7 @@ public class DelayTask {
     public DelayTask(Runnable task, long delayMs) {
         this.task = task;
         this.delayMs = delayMs;
+        this.name = Thread.currentThread().getName() + Thread.currentThread().getId();
 
         this.timeoutTimestamp = System.currentTimeMillis() + delayMs;
         this.virtualId = UUID.randomUUID().toString();

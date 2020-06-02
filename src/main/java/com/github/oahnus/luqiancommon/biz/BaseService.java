@@ -47,6 +47,10 @@ public class BaseService<M extends MyMapper<T>, T, K> {
         return mapper.selectByExample(qb.getExample());
     }
 
+    public int count(QueryBuilder qb) {
+        return mapper.selectCountByExample(qb.getExample());
+    }
+
     public List<T> selectAll() {
         return mapper.selectAll();
     }
