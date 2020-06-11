@@ -11,16 +11,12 @@ import java.lang.reflect.Method;
  * 9:45.
  */
 public class ReflectUtils {
-    public static Method getMethod(final ProceedingJoinPoint pjp) {
+    public static Method getMethod(final ProceedingJoinPoint pjp) throws NoSuchMethodException {
         final MethodSignature methodSignature = (MethodSignature) pjp.getSignature();
         Method method = methodSignature.getMethod();
 
         if (method.getDeclaringClass().isInterface()) {
-            try {
-                method = pjp.getTarget().getClass().getDeclaredMethod(method.getName(), method.getParameterTypes());
-            } catch (NoSuchMethodException e) {
-                throw new CacheException(e.getMessage());
-            }
+            method = pjp.getTarget().getClass().getDeclaredMethod(method.getName(), method.getParameterTypes());
         }
         return method;
     }

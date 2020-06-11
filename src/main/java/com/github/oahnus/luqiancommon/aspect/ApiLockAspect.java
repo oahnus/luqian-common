@@ -1,5 +1,6 @@
 package com.github.oahnus.luqiancommon.aspect;
 
+import com.alibaba.fastjson.JSON;
 import com.github.oahnus.luqiancommon.annotations.ApiLock;
 import com.github.oahnus.luqiancommon.enums.ApiLockStrategy;
 import com.github.oahnus.luqiancommon.util.ReflectUtils;
@@ -19,6 +20,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by oahnus on 2020-06-11
@@ -27,8 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class ApiLockAspect {
     private Map<String, String> tokenMap = new ConcurrentHashMap<>();
-    private ThreadLocal<String> threadLocal = new ThreadLocal<>();
-    // TODO 配置 是否分布式
+    private ThreadLocal<AtomicInteger> threadLocal = new ThreadLocal<>();
 
     @Pointcut("@annotation(com.github.oahnus.luqiancommon.annotations.ApiLock)")
     public void pointCut() {}
@@ -40,8 +41,10 @@ public class ApiLockAspect {
             return pjp.proceed();
         }
 
+        String reqToken = calSig(request, pjp);
+
         try {
-            boolean acquired = acquire(request);
+            boolean acquired = acquire(reqToken);
             if (!acquired) {
                 Method handleMethod = ReflectUtils.getMethod(pjp);
                 ApiLock apiLock = handleMethod.getAnnotation(ApiLock.class);
@@ -63,7 +66,7 @@ public class ApiLockAspect {
                                 return null;
                             }
 
-                            if (acquire(request)) {
+                            if (acquire(reqToken)) {
                                 break;
                             }
                             c ++;
@@ -75,12 +78,31 @@ public class ApiLockAspect {
                 }
             }
             Object retVal = pjp.proceed();
-            release(request);
+            release(reqToken);
             return retVal;
         } catch (Exception e) {
-            release(request);
+            release(reqToken);
             throw e;
         }
+    }
+
+    private String calSig(HttpServletRequest request, ProceedingJoinPoint pjp) {
+        String url = request.getRequestURI();
+        String method = request.getMethod();
+        String remoteHost = request.getRemoteHost();
+        Object[] args = pjp.getArgs();
+        Object[] serialArgs = new Object[args.length];
+        for (int i = 0; i < args.length; i++) {
+            Object arg = args[i];
+            if (arg instanceof HttpServletRequest || arg instanceof HttpServletResponse) {
+                serialArgs[i] = "";
+                continue;
+            }
+            serialArgs[i] = arg;
+        }
+        String req = remoteHost + url + method + JSON.toJSONString(serialArgs);
+
+        return hash(req);
     }
 
     private String hash(String str) {
@@ -95,41 +117,31 @@ public class ApiLockAspect {
         return attributes.getRequest();
     }
 
-    private boolean acquire(HttpServletRequest request) {
-        // TODO 分布式
-        String url = request.getRequestURI();
-        String method = request.getMethod();
-        String queryString = request.getQueryString();
-        String remoteHost = request.getRemoteHost();
-        String req = remoteHost + url + method + queryString;
-
-        String hash = hash(req);
-
-        if (threadLocal.get() != null) {
+    private boolean acquire(String reqToken) {
+        AtomicInteger count = threadLocal.get();
+        if (count != null) {
+            count.getAndIncrement();
             return true;
         }
-
-        String beforeReq = tokenMap.putIfAbsent(hash, req);
-
-        if (beforeReq == null) {
-            threadLocal.set(hash);
+        String s = tokenMap.putIfAbsent(reqToken, "");
+        if (s == null) {
+            threadLocal.set(new AtomicInteger());
             return true;
         }
         return false;
     }
 
-    private void release(HttpServletRequest request) {
-        // TODO 分布式
-        String url = request.getRequestURI();
-        String method = request.getMethod();
-        String queryString = request.getQueryString();
-        String remoteHost = request.getRemoteHost();
-        String req = remoteHost + url + method + queryString;
-
-        String hash = hash(req);
-
-        tokenMap.remove(hash);
-        threadLocal.remove();
+    private void release(String reqToken) {
+        AtomicInteger count = threadLocal.get();
+        if (count != null) {
+            System.out.println("release " + count.get());
+        }
+        if (count != null && count.get() > 0) {
+            count.getAndDecrement();
+        } else {
+            threadLocal.remove();
+            tokenMap.remove(reqToken);
+        }
     }
 
     public void response(String msg) throws IOException {
