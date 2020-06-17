@@ -1,10 +1,13 @@
 package com.github.oahnus.luqiancommon.util;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -23,16 +26,21 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by oahnus on 2017/4/16
  * 21:30.
  */
+@Slf4j
 public class ApacheHttp {
 
-    static PoolingHttpClientConnectionManager poolManager = null;
-    static CloseableHttpClient httpClient;
-    static RequestConfig requestConfig;
+    private static ExecutorService threadPool = new ThreadPoolExecutor(10, 20, 60L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(20));
+
+    private static PoolingHttpClientConnectionManager poolManager = null;
+    private static RequestConfig requestConfig;
 
     static {
         try {
@@ -51,9 +59,7 @@ public class ApacheHttp {
             poolManager.setMaxTotal(50);
             // 最大路由
             poolManager.setDefaultMaxPerRoute(poolManager.getMaxTotal());
-//            int socketTimeout = 5000;
-//            int connectTimeout = 5000;
-//            int connectionRequestTimeout = 5000;
+
             int socketTimeout = 60000;
             int connectTimeout = 60000;
             int connectionRequestTimeout = 60000;
@@ -68,7 +74,7 @@ public class ApacheHttp {
     }
 
     public static CloseableHttpClient getClient() {
-        CloseableHttpClient httpClient = HttpClients.custom()
+        return HttpClients.custom()
                 // 设置连接池管理
                 .setConnectionManager(poolManager)
                 // 设置请求配置
@@ -76,20 +82,12 @@ public class ApacheHttp {
                 .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36  ")
                 // 设置重试次数
                 .setRetryHandler(new DefaultHttpRequestRetryHandler(0, false))
-//        setConnectionManagerShared
                 .setConnectionManagerShared(true)
                 .build();
-
-        if (poolManager != null && poolManager.getTotalStats() != null) {
-//            System.out.println("now client pool "
-//                    + poolManager.getTotalStats().toString());
-        }
-
-        return httpClient;
     }
 
     public static CloseableHttpClient getClient(String proxyUrl) {
-        CloseableHttpClient httpClient = HttpClients.custom()
+        return HttpClients.custom()
                 // 设置连接池管理
                 .setConnectionManager(poolManager)
                 // 设置请求配置
@@ -101,13 +99,6 @@ public class ApacheHttp {
 //        setConnectionManagerShared
                 .setConnectionManagerShared(true)
                 .build();
-
-        if (poolManager != null && poolManager.getTotalStats() != null) {
-//            System.out.println("now client pool "
-//                    + poolManager.getTotalStats().toString());
-        }
-
-        return httpClient;
     }
 
     public static String requestWebPage(String url) throws IOException{
@@ -150,45 +141,178 @@ public class ApacheHttp {
         return respBody;
     }
 
-    public static void saveImgUrl(CloseableHttpClient httpClient, String imgUrl, OutputStream out) throws IOException {
-        HttpGet httpGet = null;
-        try {
-            httpGet = new HttpGet(imgUrl);
-            CloseableHttpResponse response = httpClient.execute(httpGet);
-            int statusCode = response.getStatusLine().getStatusCode();
+    public static void download(String url, String savePath, String filename) throws IOException {
+        String fullPath;
+        if (filename == null || filename.trim().equals("")) {
+            filename = getFilenameFromUrl(url);
+        }
+        if (savePath == null || savePath.trim().equals("")) {
+            fullPath = filename;
+        } else {
+            File path = new File(savePath);
+            if (!path.exists()) {
+                boolean res = path.mkdirs();
+            }
+            if (savePath.endsWith("/")) {
+                fullPath = savePath + filename;
+            } else {
+                fullPath = savePath + "/" + filename;
+            }
+        }
+        FileOutputStream fos = new FileOutputStream(fullPath);
+        download(url, fos);
+    }
 
-            if (statusCode != 200) {
-                System.out.println("Img 请求失败");
-                return;
+    public static void download(String url, String savePath) throws IOException {
+        download(url, savePath, "");
+    }
+
+    public static void download(String url, OutputStream out) throws IOException {
+        CloseableHttpClient client = getClient();
+        download(client, url, out);
+    }
+
+    public static void download(CloseableHttpClient client, String url, OutputStream out) throws IOException {
+        HttpHead httpHead = new HttpHead(url);
+        CloseableHttpResponse headResp = client.execute(httpHead);
+
+        Header[] headers = headResp.getAllHeaders();
+        int byteLen = 0;
+        String contentType = "";
+        for (Header header : headers) {
+            String name = header.getName();
+            if (name.equals("Content-Length")) {
+                String value = header.getValue();
+                byteLen = Integer.valueOf(value);
+                break;
+            }
+        }
+
+        int sliceNum = 1;
+        // 文件大小大于1M
+        if (byteLen > 1024 * 1024) {
+            sliceNum = 4;
+        }
+
+        int statusCode = headResp.getStatusLine().getStatusCode();
+        if (statusCode == 302 || statusCode == 405) {
+            // 如果重定向, 放弃切片
+            sliceNum = 1;
+            log.debug("Cannot Get Total Bytes From Head Request");
+        } else if (statusCode != 200) {
+            throw new RuntimeException("Http Error With Code " + statusCode);
+        } else {
+            log.debug("Resource Total Bytes {}", byteLen);
+        }
+
+        final String downloadUrl = url;
+        if (sliceNum == 1) {
+            threadPool.submit(() -> {
+                try {
+                    downloadDirect(downloadUrl, out);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            CountDownLatch cdl = new CountDownLatch(sliceNum);
+            AtomicInteger idx = new AtomicInteger();
+
+            final int unit = byteLen / sliceNum;
+            final int max = byteLen;
+            final int maxSliceIdx = sliceNum;
+
+            log.debug("Total Slice Num {}", sliceNum);
+            ByteArrayOutputStream[] buffers = new ByteArrayOutputStream[sliceNum];
+            AtomicBoolean isError = new AtomicBoolean();
+            for (int i=0; i < sliceNum; i++) {
+                Future<?> future = threadPool.submit(() -> {
+                    int startIdx = idx.getAndIncrement();
+                    ByteArrayOutputStream bao = new ByteArrayOutputStream();
+                    log.debug("Slice {} Start", startIdx);
+                    int startByte = startIdx * unit;
+                    int endByte = startByte + unit - 1;
+                    if (startIdx == maxSliceIdx - 1) {
+                        endByte = max - 1;
+                    }
+                    try {
+                        downlaodRange(downloadUrl, startByte, endByte, bao);
+                    } catch (IOException e) {
+                        log.error("Slice {} Error With Message {}", startIdx, e.getMessage());
+                        cdl.countDown();
+                        isError.compareAndSet(false, true);
+                        return;
+                    }
+                    buffers[startIdx] = bao;
+                    cdl.countDown();
+                    log.debug("Slice {} Finish", startIdx);
+                });
             }
 
-            InputStream inputStream = response.getEntity().getContent();
-//            System.out.println(inputStream.available());
+            try {
+                cdl.await();
+            } catch (InterruptedException e) {
+                return;
+            }
+            if (isError.get()) {
+                throw new RuntimeException("Downlaod Error");
+            }
 
-            byte[] buffer = new byte[4096];
-            int n = 0;
-            while (-1 != (n = inputStream.read(buffer))) {
-                out.write(buffer, 0, n);
+            for (ByteArrayOutputStream buffer : buffers) {
+                IOUtils.write(buffer.toByteArray(), out);
+                buffer.close();
             }
             out.flush();
             out.close();
-            response.close();
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (httpGet != null) {
-                httpGet.releaseConnection();
-            }
         }
     }
 
-    public static void saveImgUrl(String imgUrl, OutputStream out) throws IOException {
-        CloseableHttpClient httpClient = getClient();
-        saveImgUrl(httpClient, imgUrl, out);
+    private static void downlaodRange(String url, int start, int end, OutputStream out) throws IOException {
+        CloseableHttpClient client = getClient();
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setHeader("Range", String.format("bytes=%d-%d", start, end));
+
+        CloseableHttpResponse response = client.execute(httpGet);
+        InputStream content = response.getEntity().getContent();
+        IOUtils.copy(content, out);
     }
 
-    public static void saveImgUrl(String proxyUrl, String imgUrl, OutputStream out) throws IOException {
-        CloseableHttpClient httpClient = getClient(proxyUrl);
-        saveImgUrl(httpClient, imgUrl, out);
+    private static void downloadDirect(String url, OutputStream out) throws IOException {
+        CloseableHttpClient client = getClient();
+        HttpGet httpGet = new HttpGet(url);
+        CloseableHttpResponse response = client.execute(httpGet);
+        int statusCode = response.getStatusLine().getStatusCode();
+        if (statusCode != 200) {
+            throw new RuntimeException("Http Error With Code " + statusCode);
+        }
+        Header contentLengthHeader = response.getFirstHeader("Content-Length");
+        log.debug("File Total Bytes {}", contentLengthHeader.getValue());
+
+        InputStream content = response.getEntity().getContent();
+        IOUtils.copy(content, out);
+    }
+
+    private static String getFilenameFromUrl(String url) {
+        String filename = url;
+        int quesMarkIdx = url.lastIndexOf("?");
+        if (quesMarkIdx > 0) {
+            filename = url.substring(0, quesMarkIdx);
+        }
+        int speIdx = url.lastIndexOf("/");
+        if (speIdx > 0) {
+            filename = filename.substring(speIdx + 1);
+        }
+        return filename;
+    }
+
+    public static void main(String[] args) throws IOException {
+        long startTime = System.currentTimeMillis();
+        System.out.println("start");
+
+
+        String url = "https://hbimg.huabanimg.com/b2518fa6829ceeaeafa166c1ad0d9eafe7d8e0d93f108-EnmqA2_fw658/format/webp";
+        download(url, "C:/D/download/");
+        System.out.println("Runtime " + (System.currentTimeMillis() - startTime));
+        threadPool.shutdown();
     }
 }
