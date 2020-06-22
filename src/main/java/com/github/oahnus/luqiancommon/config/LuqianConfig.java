@@ -6,6 +6,7 @@ import com.github.oahnus.luqiancommon.config.condition.QiniuCondition;
 import com.github.oahnus.luqiancommon.config.condition.RedissonCondition;
 import com.github.oahnus.luqiancommon.config.props.LuqianProperties;
 import com.github.oahnus.luqiancommon.config.props.RedissonProperties;
+import com.github.oahnus.luqiancommon.util.QiniuUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -71,6 +72,7 @@ public class LuqianConfig {
         QiniuProperties qiniuProperties = properties.getQiniu();
         qiNiuClient.setProperties(qiniuProperties);
         qiNiuClient.startCleaner();
+        QiniuUtils.init(qiniuProperties);
         return qiNiuClient;
     }
 }

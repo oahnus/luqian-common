@@ -3,7 +3,7 @@ package com.github.oahnus.luqiancommon.config.cdn;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.github.oahnus.luqiancommon.util.SpringAppContextUtils;
+import com.github.oahnus.luqiancommon.util.QiniuUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -20,9 +20,8 @@ public class QiniuSerializer extends JsonSerializer<String> {
             jsonGenerator.writeString(s);
             return;
         }
-        QiniuClient qiniuClient = SpringAppContextUtils.getBean(QiniuClient.class);
         // 没有配置私有空间域名，直接返回原始字符串
-        String urlPrefix = qiniuClient.getUrlPrefix();
+        String urlPrefix = QiniuUtils.urlPrefix();
         if (StringUtils.isEmpty(urlPrefix)) {
             jsonGenerator.writeString(s);
             return;
@@ -33,12 +32,12 @@ public class QiniuSerializer extends JsonSerializer<String> {
             wrappedStr = s.replace("[", "").replace("]", "");
             String[] urls = wrappedStr.split(",");
             for (int i = 0; i < urls.length; i++) {
-                urls[i] = qiniuClient.buildAccessSign(urls[i]);
+                urls[i] = QiniuUtils.buildAccessSign(urls[i]);
             }
             wrappedStr = "[" + String.join(",", urls) + "]";
         } else {
             // 普通url
-            wrappedStr = qiniuClient.buildAccessSign(s);
+            wrappedStr = QiniuUtils.buildAccessSign(s);
         }
         jsonGenerator.writeString(wrappedStr);
     }

@@ -1,27 +1,22 @@
 package com.github.oahnus.luqiancommon.config.cdn;
 
 import com.github.oahnus.luqiancommon.dto.QiniuBatchResult;
-import com.qiniu.common.QiniuException;
-import com.qiniu.http.Response;
-import com.qiniu.storage.BucketManager;
-import com.qiniu.storage.Configuration;
-import com.qiniu.storage.Region;
-import com.qiniu.storage.model.BatchStatus;
+import com.github.oahnus.luqiancommon.util.QiniuUtils;
+import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
-import com.qiniu.util.StringUtils;
-import com.qiniu.util.UrlSafeBase64;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by oahnus on 2019/9/20
@@ -39,40 +34,10 @@ public class QiniuClient {
 
     private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-    private static BucketManager bucketManager;
-    private SecretKeySpec secretKeySpec;
-
     public void setProperties(QiniuProperties qiniuProperties) {
         this.accessKey = qiniuProperties.getAccessKey();
         this.secretKey = qiniuProperties.getSecretKey();
         this.urlPrefix = qiniuProperties.getUrlPrefix();
-
-        byte[] sk = StringUtils.utf8Bytes(secretKey);
-        secretKeySpec = new SecretKeySpec(sk, "HmacSHA1");
-    }
-
-    /**
-     * 获取资源管理器
-     * @return 资源管理器
-     */
-    public BucketManager getBucketManager() {
-        if (bucketManager == null) {
-            synchronized (this) {
-                if (bucketManager == null) {
-                    Auth auth = Auth.create(accessKey, secretKey);
-                    Configuration cfg = new Configuration(Region.region0());
-                    bucketManager = new BucketManager(auth, cfg);
-                }
-            }
-        }
-        return bucketManager;
-    }
-
-    public String getUrlPrefix() {
-        if (StringUtils.isNullOrEmpty(this.urlPrefix)) {
-            return this.urlPrefix;
-        }
-        return checkUrlSeparator(this.urlPrefix);
     }
 
     /**
@@ -105,6 +70,15 @@ public class QiniuClient {
         return token;
     }
 
+    public DefaultPutRet upload(String bucket, InputStream in, String key) throws IOException {
+        byte[] bytes = IOUtils.toByteArray(in);
+        return QiniuUtils.upload(bucket, bytes, key);
+    }
+
+    public DefaultPutRet upload(String bucket, byte[] bytes, String key) throws IOException {
+        return QiniuUtils.upload(bucket, bytes, key);
+    }
+
     /**
      * 批量删除文件
      * @param bucket 仓库
@@ -112,38 +86,7 @@ public class QiniuClient {
      * @return qiniu result dto
      */
     public QiniuBatchResult deleteBatch(String bucket, List<String> keyList) {
-        if (keyList == null || keyList.isEmpty()) {
-            return new QiniuBatchResult().error("Qiniu Key List Cannot Empty");
-        }
-        if (keyList.size() > 1000) {
-            return new QiniuBatchResult().error("Qiniu Key List Size Cannot More Than 1000");
-        }
-
-        BucketManager bucketManager = getBucketManager();
-
-        QiniuBatchResult result = new QiniuBatchResult();
-        try {
-            //单次批量请求的文件数量不得超过1000
-            String[] keyArr = keyList.toArray(new String[]{});
-            BucketManager.BatchOperations batchOperations = new BucketManager.BatchOperations();
-            batchOperations.addDeleteOp(bucket, keyArr);
-            Response response = bucketManager.batch(batchOperations);
-            BatchStatus[] batchStatusList = response.jsonToObject(BatchStatus[].class);
-
-            for (int i = 0; i < keyArr.length; i++) {
-                BatchStatus status = batchStatusList[i];
-                String key = keyArr[i];
-                if (status.code == 200) {
-                    result.addSuccessKey(key);
-                } else {
-                    result.addErrorKey(key);
-                }
-            }
-            return result;
-        } catch (QiniuException e) {
-            e.printStackTrace();
-            return result.error(e.getMessage());
-        }
+        return QiniuUtils.deleteBatch(bucket, keyList);
     }
 
     /**
@@ -156,18 +99,7 @@ public class QiniuClient {
      * @return 带有token的完整url [http://cndn.xxx.com/filename?e=expireTimestamp&token=xxx]
      */
     public String buildAccessSign(String urlRoot, String fileKey, Long expireTimestamp) {
-        String key = wrapCacheKey(null, fileKey);
-        TokenEntity entity = TOKEN_CACHE.get(key);
-        String token ;
-        String downloadUrl = checkUrlSeparator(urlRoot) + fileKey + "?e=" + expireTimestamp;
-        if (entity == null) {
-            token = sign(downloadUrl);
-            entity = new TokenEntity(token, expireTimestamp);
-            TOKEN_CACHE.put(key, entity);
-        } else {
-            token = entity.getToken();
-        }
-        return downloadUrl + "&token=" + token;
+        return QiniuUtils.buildAccessSign(urlRoot, fileKey, expireTimestamp);
     }
 
     public String buildAccessSign(String fileKey, Long expireTimestamp) {
@@ -195,17 +127,6 @@ public class QiniuClient {
             urlPrefix += "/";
         }
         return urlPrefix;
-    }
-
-    private String sign(String url) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA1");
-            mac.init(secretKeySpec);
-            String encode = UrlSafeBase64.encodeToString(mac.doFinal(url.getBytes(StandardCharsets.UTF_8)));
-            return this.accessKey + ":" + encode;
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            return "";
-        }
     }
 
     private String wrapCacheKey(String bucket, String key) {

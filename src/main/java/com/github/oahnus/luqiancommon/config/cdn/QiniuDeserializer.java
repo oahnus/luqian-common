@@ -1,14 +1,12 @@
 package com.github.oahnus.luqiancommon.config.cdn;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.github.oahnus.luqiancommon.util.SpringAppContextUtils;
+import com.github.oahnus.luqiancommon.util.QiniuUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.sql.Wrapper;
 
 /**
  * Created by oahnus on 2020-04-01
@@ -17,15 +15,14 @@ import java.sql.Wrapper;
  */
 public class QiniuDeserializer extends JsonDeserializer<String> {
     @Override
-    public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public String deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         String jsonStr = jsonParser.getValueAsString();
 
         if (StringUtils.isEmpty(jsonStr)) {
             return jsonStr;
         }
 
-        QiniuClient qiniuClient = SpringAppContextUtils.getBean(QiniuClient.class);
-        String urlPrefix = qiniuClient.getUrlPrefix();
+        String urlPrefix = QiniuUtils.urlPrefix();
         if (StringUtils.isEmpty(urlPrefix)) {
             return jsonStr;
         }

@@ -58,7 +58,10 @@ public class CaptchaUtils {
                 int y1 = random.nextInt(h);
                 int x2 = random.nextInt(w / 2)  + w/2 - 10;
                 int y2 = random.nextInt(h);
+                graphics2D.setColor(randomColor());
                 graphics2D.drawLine(x1, y1, x2, y2);
+            }
+            for (int i=0;i<8;i++) {
                 graphics2D.setColor(randomColor());
                 graphics2D.fillOval(random.nextInt(w), random.nextInt(h), 4, 4);
                 graphics2D.fillOval(random.nextInt(w), random.nextInt(h), 4, 4);
