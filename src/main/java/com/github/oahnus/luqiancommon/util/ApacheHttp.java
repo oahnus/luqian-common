@@ -198,22 +198,16 @@ public class ApacheHttp {
         if (statusCode == 302 || statusCode == 405) {
             // 如果重定向, 放弃切片
             sliceNum = 1;
-            log.debug("Cannot Get Total Bytes From Head Request");
+            log.info("Cannot Get Total Bytes From Head Request");
         } else if (statusCode != 200) {
             throw new RuntimeException("Http Error With Code " + statusCode);
         } else {
-            log.debug("Resource Total Bytes {}", byteLen);
+            log.info("Resource Total Bytes {}", byteLen);
         }
 
         final String downloadUrl = url;
         if (sliceNum == 1) {
-            threadPool.submit(() -> {
-                try {
-                    downloadDirect(downloadUrl, out);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+            downloadDirect(downloadUrl, out);
         } else {
             CountDownLatch cdl = new CountDownLatch(sliceNum);
             AtomicInteger idx = new AtomicInteger();
@@ -222,14 +216,14 @@ public class ApacheHttp {
             final int max = byteLen;
             final int maxSliceIdx = sliceNum;
 
-            log.debug("Total Slice Num {}", sliceNum);
+            log.info("Total Slice Num {}", sliceNum);
             ByteArrayOutputStream[] buffers = new ByteArrayOutputStream[sliceNum];
             AtomicBoolean isError = new AtomicBoolean();
             for (int i=0; i < sliceNum; i++) {
                 Future<?> future = threadPool.submit(() -> {
                     int startIdx = idx.getAndIncrement();
                     ByteArrayOutputStream bao = new ByteArrayOutputStream();
-                    log.debug("Slice {} Start", startIdx);
+                    log.info("Slice {} Start", startIdx);
                     int startByte = startIdx * unit;
                     int endByte = startByte + unit - 1;
                     if (startIdx == maxSliceIdx - 1) {
@@ -245,7 +239,7 @@ public class ApacheHttp {
                     }
                     buffers[startIdx] = bao;
                     cdl.countDown();
-                    log.debug("Slice {} Finish", startIdx);
+                    log.info("Slice {} Finish", startIdx);
                 });
             }
 
@@ -286,7 +280,7 @@ public class ApacheHttp {
             throw new RuntimeException("Http Error With Code " + statusCode);
         }
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
-        log.debug("File Total Bytes {}", contentLengthHeader.getValue());
+        log.info("File Total Bytes {}", contentLengthHeader.getValue());
 
         InputStream content = response.getEntity().getContent();
         IOUtils.copy(content, out);
@@ -309,10 +303,14 @@ public class ApacheHttp {
         long startTime = System.currentTimeMillis();
         System.out.println("start");
 
+        String url = "https://cdn.spacetelescope.org/archives/images/publicationjpg/heic1909a.jpg";
+        try{
+            download(url, "C:/D/download2/");
+        } catch (Exception e) {
 
-        String url = "https://hbimg.huabanimg.com/b2518fa6829ceeaeafa166c1ad0d9eafe7d8e0d93f108-EnmqA2_fw658/format/webp";
-        download(url, "C:/D/download/");
-        System.out.println("Runtime " + (System.currentTimeMillis() - startTime));
-        threadPool.shutdown();
+        } finally {
+            System.out.println("Runtime " + (System.currentTimeMillis() - startTime));
+            threadPool.shutdown();
+        }
     }
 }
