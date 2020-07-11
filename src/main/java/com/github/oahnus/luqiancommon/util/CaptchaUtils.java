@@ -1,10 +1,11 @@
 package com.github.oahnus.luqiancommon.util;
 
+import sun.font.FontDesignMetrics;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Random;
 
 /**
@@ -12,42 +13,73 @@ import java.util.Random;
  */
 public class CaptchaUtils {
     private static Random random = new Random();
+    private static final int DEFAULT_WIDTH = 100;
+    private static final int DEFAULT_HEIGHT = 40;
 
+    /**
+     * 生成验证码
+     * @param captcha 验证码文本
+     * @param out 输出流
+     * @throws IOException e
+     */
     public static void captcha(String captcha, OutputStream out) throws IOException {
-        genCaptchaImg(captcha, out, false);
+        captcha(captcha, out, false);
     }
 
+    /**
+     * 生成验证码
+     * @param captcha 验证码文本
+     * @param out 输出流
+     * @param withConfusion 是否包含直线等混淆线
+     * @throws IOException e
+     */
     public static void captcha(String captcha, OutputStream out, Boolean withConfusion) throws IOException {
-        genCaptchaImg(captcha, out, withConfusion);
+        captcha(captcha, out, withConfusion, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     }
 
-    public static String[] genArithmeticCaptcha() {
-        int a = random.nextInt(100);
-        int b = random.nextInt(100);
-        int operator = random.nextInt(2);
+    /**
+     * 生成验证码
+     * @param captcha 验证码文本
+     * @param out 输出流
+     * @param withConfusion 是否包含直线等混淆线
+     * @param w width
+     * @param h height
+     */
+    public static void captcha(String captcha, OutputStream out, Boolean withConfusion, int w, int h) throws IOException {
+        int captchaLen = captcha.length();
 
-        if (operator == 0) {
-            String expression = String.format("%d%s%d=?", a, "+", b);
-            return new String[]{expression, String.valueOf(a + b)};
-        } else {
-            String expression = String.format("%d%s%d = ?", a, "-", b);
-            return new String[]{expression, String.valueOf(a - b)};
+        // 计算给定尺寸内能得到的最大正方形
+        int sideLen = w / captchaLen;
+        if (sideLen > h) {
+            sideLen = h - 4;
         }
-    }
+        // 字体大小设为正方形边长
+        int fontSize = sideLen;
 
-    private static void genCaptchaImg(String captcha, OutputStream out, Boolean withConfusion) throws IOException {
-        int w = 100, h = 40;
+        // 画布
         BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         Graphics graphics = image.getGraphics();
         graphics.setColor(Color.WHITE);
         graphics.fillRect(0, 0, w, h);
-        graphics.setFont(new Font(Font.MONOSPACED, Font.BOLD, 26));
 
-        int offset = 10;
+        // 字体
+        Font font = new Font(Font.MONOSPACED, Font.BOLD, fontSize);
+        graphics.setFont(font);
+        FontDesignMetrics metrics = FontDesignMetrics.getMetrics(font);
+
+        // 获取完整字符串width
+        int stringWidth = metrics.stringWidth(captcha);
+        // 字符间隔width
+        int spaceWidth = (w - stringWidth) / (captchaLen + 1);
+        // 单个字符width
+        int charWidth = stringWidth / captchaLen;
+        // 计算字符串横纵绘制坐标
+        int top = (h - metrics.getHeight()) / 2 + metrics.getAscent();
+        int left = spaceWidth;
         for (String ch : captcha.split("")){
             graphics.setColor(randomColor());
-            graphics.drawString(ch, offset, (h * 2 / 3));
-            offset += 20;
+            graphics.drawString(ch, left, top);
+            left = left + charWidth + spaceWidth;
         }
 
         if (withConfusion) {
@@ -69,6 +101,20 @@ public class CaptchaUtils {
         }
         ImageIO.write(image, "jpeg", out);
         out.flush();
+    }
+
+    public static String[] genArithmeticCaptcha() {
+        int a = random.nextInt(100);
+        int b = random.nextInt(100);
+        int operator = random.nextInt(2);
+
+        if (operator == 0) {
+            String expression = String.format("%d%s%d=?", a, "+", b);
+            return new String[]{expression, String.valueOf(a + b)};
+        } else {
+            String expression = String.format("%d%s%d = ?", a, "-", b);
+            return new String[]{expression, String.valueOf(a - b)};
+        }
     }
 
     private static Color randomColor() {

@@ -42,3 +42,25 @@ luqian:
     ```
 
 在Entity中使用枚举类型时，要添加@Column注解，将枚举类型当做表字段（默认情况下只有简单类型才会被当作表中的字段）
+
+
+## Note 注意事项
+
+使用数据库生成自增id时，如果需要在insert时获取到id, 需要添加mybatis配置
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+        <setting name="useGeneratedKeys" value="true"/>
+    </settings>
+</configuration>
+```
+并且在实体类的id字段上添加注解
+```java
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+```

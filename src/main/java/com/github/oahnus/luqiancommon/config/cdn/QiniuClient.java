@@ -117,7 +117,6 @@ public class QiniuClient {
     public void startCleaner() {
         log.debug("[QiniuClient].static initializer - Init Cache Cleaner");
         executor.scheduleAtFixedRate(() -> {
-            log.debug("[QiniuClient].Cleaner - Run Cleaner");
             cleanCacheMap();
         }, 5, CLEAN_INTERVAL, TimeUnit.SECONDS);
     }
