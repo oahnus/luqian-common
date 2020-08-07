@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * 检验工具
  */
 public class ValidUtils {
-    private static Pattern ID_CARD_PATTERN = Pattern.compile("^[1-9][0-9]{5}(19[0-9]{2}|200[0-9]|2010)(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[0-9]{3}[0-9xX]$");
+    private static Pattern ID_CARD_PATTERN = Pattern.compile("^[1-9][0-9]{5}(19[0-9]{2}|20[0-9]{2})(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[0-9]{3}[0-9xX]$");
     // 身份证号 加权因子
     private static int[] ID_CARD_FACTOR = new int[]{7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
     // 身份证号校验位
@@ -29,14 +29,9 @@ public class ValidUtils {
             return false;
         }
         String[] chars = idCardNumber.split("");
-        //∑(ai×Wi)(mod 11)
-        int sum = 0, ai = 0, wi = 0;
-        for (int i = 0; i < 17; i++) {
-            ai = Integer.valueOf(chars[i]);
-            wi = ID_CARD_FACTOR[i];
-            sum += ai * wi;
-        }
-        char result = ID_CARD_PARITY[sum % 11];
+
+        char result = calCheckDigit(chars);
+
         if (result == 'X') {
             return "X".equals(chars[17]);
         } else {
@@ -72,11 +67,14 @@ public class ValidUtils {
         return (sum & 9) == 0;
     }
 
-    public static void main(String... args) {
-        System.out.println(bankNumLuhn("6225880184694629"));
-        System.out.println(bankNumLuhn("4026587647818317"));
-        System.out.println(bankNumLuhn("6222619185844168449"));
-        System.out.println(bankNumLuhn("8701001752636178"));
-        System.out.println(bankNumLuhn("622292065907906433"));
+    private static char calCheckDigit(String[] strings) {
+        //∑(ai×Wi)(mod 11)
+        int sum = 0, ai = 0, wi = 0;
+        for (int i = 0; i < 17; i++) {
+            ai = Integer.valueOf(strings[i]);
+            wi = ID_CARD_FACTOR[i];
+            sum += ai * wi;
+        }
+        return ID_CARD_PARITY[sum % 11];
     }
 }

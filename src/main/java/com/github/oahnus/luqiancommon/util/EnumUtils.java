@@ -1,6 +1,6 @@
 package com.github.oahnus.luqiancommon.util;
 
-import com.github.oahnus.luqiancommon.mybatis.BaseEnum;
+import com.github.oahnus.luqiancommon.enums.BaseEnum;
 
 import java.io.*;
 import java.lang.reflect.Field;

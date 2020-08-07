@@ -6,7 +6,7 @@
 
     <groupId>com.github.oahnus</groupId>
     <artifactId>luqian-common</artifactId>
-    <version>0.2.4</version>
+    <version>0.2.5</version>
     <build>
         <plugins>
             <plugin>
@@ -39,7 +39,6 @@
         <redisson.version>3.11.1</redisson.version>
         <spring-configuration-processor.version>2.1.6.RELEASE</spring-configuration-processor.version>
         <mockito.version>1.10.19</mockito.version>
-        <tkmapper.version>4.1.5</tkmapper.version>
         <pagehelper.version>1.2.12</pagehelper.version>
         <curator.version>4.2.0</curator.version>
         <fastjson.version>1.2.56</fastjson.version>
@@ -49,9 +48,31 @@
         <zip4j.version>2.6.1</zip4j.version>
         <zxing.version>3.4.0</zxing.version>
         <commons-io.version>2.6</commons-io.version>
+        <jwt.version>0.9.0</jwt.version>
+        <mybatis-plus.version>3.2.0</mybatis-plus.version>
+        <mybatis.version>3.5.1</mybatis.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>${mybatis.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>${jwt.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -87,12 +108,6 @@
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>${pagehelper.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>tk.mybatis</groupId>
-            <artifactId>mapper</artifactId>
-            <version>${tkmapper.version}</version>
         </dependency>
 
         <dependency>

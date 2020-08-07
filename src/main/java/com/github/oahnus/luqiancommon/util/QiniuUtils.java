@@ -58,6 +58,10 @@ public class QiniuUtils {
         }
     }
 
+    public static BucketManager bucketManager() {
+        return bucketManager;
+    }
+
     public static String urlPrefix() {
         if (StringUtils.isNullOrEmpty(urlPrefix)) {
             return "";
