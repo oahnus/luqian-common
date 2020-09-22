@@ -2,10 +2,7 @@ package com.github.oahnus.luqiancommon.timer;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Created by oahnus on 2020-01-03
@@ -49,9 +46,11 @@ public class MineTimer {
     public void add(DelayTask delayTask) {
         if (!timeWheel.addTask(delayTask)) {
             log.debug("RUN TASK {}", delayTask);
-            workerThreadPool.submit(delayTask.getTask());
+            Future<?> future = workerThreadPool.submit(delayTask.getTask());
+            future.cancel(true);
+
             // 如果延时任务需要常驻, 在提交执行时，将自身再次加入槽中
-            if (delayTask.getAllways()) {
+            if (delayTask.getAlways()) {
                 delayTask.refresh();
                 timeWheel.addTask(delayTask);
             }
@@ -84,5 +83,9 @@ public class MineTimer {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public long taskSize() {
+        return timeWheel.taskSize();
     }
 }

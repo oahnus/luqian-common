@@ -20,7 +20,7 @@ public class DelayTask {
 
     private DelayTask nextTask;
     private DelayTask prevTask;
-    private Boolean allways = false; // 任务是否常驻， false 只执行一次
+    private Boolean always = false; // 任务是否常驻， false 只执行一次
 
     private String virtualId;
 
@@ -36,6 +36,16 @@ public class DelayTask {
     public DelayTask(Runnable task, long delayMs, String name) {
         this(task, delayMs);
         this.name = name;
+    }
+
+    public DelayTask name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public DelayTask always() {
+        this.always = true;
+        return this;
     }
 
     public void refresh() {

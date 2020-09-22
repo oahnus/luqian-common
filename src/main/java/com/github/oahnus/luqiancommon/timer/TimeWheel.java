@@ -70,4 +70,8 @@ public class TimeWheel {
             }
         }
     }
+
+    public long taskSize() {
+        return slotQueues.size();
+    }
 }
