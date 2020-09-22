@@ -285,25 +285,4 @@ public class DateUtils {
     public static String now() {
         return date2String(new Date(), PATTERN_YMD_HMS2);
     }
-
-    public static void main(String[] args) {
-        Date date = new Date();
-        System.out.println(date2String(date, PATTERN_YM));
-        System.out.println(date2String(date, PATTERN_YMD));
-        System.out.println(date2String(date, PATTERN_YMD_HMS));
-        System.out.println(date2String(date, PATTERN_HMS));
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String dateTime = "2016-12-30 15:35:34";
-        for (int i = 0; i < 5; i++) {
-            new Thread(() -> {
-                for (int i1 = 0; i1 < 5; i1++) {
-                    // Error
-//                        System.out.println(Thread.currentThread().getName() + "\t" + dateFormat.parse(dateTime));
-                    System.out.println(Thread.currentThread().getName() + "\t" + string2Date(dateTime, PATTERN_YMD_HMS2));
-                }
-            }).start();
-        }
-    }
-
 }

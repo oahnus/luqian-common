@@ -298,19 +298,4 @@ public class ApacheHttp {
         }
         return filename;
     }
-
-    public static void main(String[] args) throws IOException {
-        long startTime = System.currentTimeMillis();
-        System.out.println("start");
-
-        String url = "https://cdn.spacetelescope.org/archives/images/publicationjpg/heic1909a.jpg";
-        try{
-            download(url, "C:/D/download2/");
-        } catch (Exception e) {
-
-        } finally {
-            System.out.println("Runtime " + (System.currentTimeMillis() - startTime));
-            threadPool.shutdown();
-        }
-    }
 }

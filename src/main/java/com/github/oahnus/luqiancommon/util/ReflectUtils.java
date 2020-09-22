@@ -1,6 +1,5 @@
 package com.github.oahnus.luqiancommon.util;
 
-import com.github.oahnus.luqiancommon.exceptions.CacheException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 

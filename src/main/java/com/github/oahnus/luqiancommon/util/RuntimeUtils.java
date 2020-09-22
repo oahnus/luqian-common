@@ -38,11 +38,12 @@ public class RuntimeUtils {
         }
         return (int)(processors / (1 - blockFactor));
     }
+
+    /**
+     * io密集型应用推荐线程池大小
+     * @return 线程池size
+     */
     public static int ioIntensiveBestPoolSize() {
         return ioIntensiveBestPoolSize(IO_INTENSIVE_DEFAULT_BLOCK_FACTOR);
-    }
-
-    public static void main(String... args) {
-        System.out.println(cpuProcessorSize());
     }
 }

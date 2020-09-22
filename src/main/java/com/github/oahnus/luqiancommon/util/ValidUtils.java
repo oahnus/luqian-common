@@ -1,5 +1,8 @@
 package com.github.oahnus.luqiancommon.util;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,5 +79,17 @@ public class ValidUtils {
             sum += ai * wi;
         }
         return ID_CARD_PARITY[sum % 11];
+    }
+
+    public static String generateIdcard() {
+        Random random = new Random();
+        String regionCode = String.valueOf(random.nextInt(99999) + 100000);
+        int year = random.nextInt(120) + 1900;
+        LocalDate bornDate = LocalDate.of(year, 1, 1).plusDays(random.nextInt(365));
+        String born = bornDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String seq = String.format("%03d", random.nextInt(998) + 1);
+        String prefix = regionCode + born + seq;
+        char checkDigit = calCheckDigit(prefix.split(""));
+        return prefix + checkDigit;
     }
 }
