@@ -178,7 +178,9 @@ public class CacheAspect {
             Expression expression = parser.parseExpression(spel);
 
             Object value = expression.getValue(ec);
-            if (value == null) return null;
+            if (value == null) {
+                return null;
+            }
             return value.toString();
         } catch (Exception e) {
             log.error("Cache Key SPEL Parse Fialed With Error: {}",e.getMessage());

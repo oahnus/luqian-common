@@ -97,3 +97,4 @@ fabric.properties
 .idea
 *.iml
 /src/main/resources/logback.xml
+target/
