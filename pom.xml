@@ -42,7 +42,7 @@
         <pagehelper.version>1.2.12</pagehelper.version>
         <curator.version>4.2.0</curator.version>
         <fastjson.version>1.2.56</fastjson.version>
-        <hibernate-validator.version>6.1.2.Final</hibernate-validator.version>
+        <hibernate-validator.version>6.1.5.Final</hibernate-validator.version>
         <apache.httpcore.version>4.4.10</apache.httpcore.version>
         <apache.httpclient.version>4.5.6</apache.httpclient.version>
         <zip4j.version>2.6.1</zip4j.version>
