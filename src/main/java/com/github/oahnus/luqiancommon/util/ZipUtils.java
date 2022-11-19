@@ -9,6 +9,7 @@ import net.lingala.zip4j.model.enums.EncryptionMethod;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * Created by oahnus on 2020-06-23
@@ -35,7 +36,7 @@ public class ZipUtils {
     }
 
     public static void zip(OutputStream out, String password, File... files) throws IOException {
-        File file = File.createTempFile("", "temp.zip");
+        File file = Files.createTempFile("", "temp.zip").toFile();
         zip(file, password, files);
         IOUtils.copy(new FileInputStream(file), out);
         out.flush();
